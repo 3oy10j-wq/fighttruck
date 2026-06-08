@@ -2,574 +2,488 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ファイトラック - トラック休憩スポット検索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700;900&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+*{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --blue:#1565C0;--blue-d:#0D47A1;--blue-l:#E3F0FF;--blue-p:#F0F6FF;
-  --blue-m:#1976D2;--blue-b:#BBDEFB;
-  --green:#2E7D32;--green-l:#E8F5E9;
-  --red:#C62828;--red-l:#FFEBEE;
-  --orange:#E65100;--orange-l:#FFF3E0;
-  --text:#0D1B2A;--text2:#5B7A9D;--border:#DDEAF7;
+  --navy:#0A1628;--blue:#1565C0;--blue-v:#1E88E5;--cyan:#00ACC1;
+  --accent:#FF6F00;--accent-l:#FFF3E0;
+  --white:#fff;--gray:#F4F6F9;--text:#1A2332;--text2:#6B7A8D;
+  --border:#E0E8F5;--shadow:0 4px 24px rgba(10,22,40,.12);
+  --radius:12px;--radius-lg:20px;
 }
-html,body{width:100%;min-height:100vh;background:#EBF3FC;font-family:'Noto Sans JP',sans-serif;font-size:14px;color:var(--text)}
-.app{max-width:480px;margin:0 auto;background:#fff;min-height:100vh;display:flex;flex-direction:column;box-shadow:0 0 40px rgba(21,101,192,.1)}
-.page{display:none;flex:1;flex-direction:column}
-.page.active{display:flex}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--gray);color:var(--text);min-height:100vh}
 
-/* NAV */
-.top-nav{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.1rem;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:300}
-.logo{display:flex;align-items:center;gap:8px;cursor:pointer}
-.logo-mark{width:32px;height:32px;background:var(--blue);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.logo-name{font-size:15px;font-weight:700;color:var(--blue-d)}
-.logo-sub{font-size:9px;color:var(--blue-m);display:block}
-.btn-login{font-size:11px;color:var(--blue);border:1px solid var(--blue-b);border-radius:7px;padding:5px 12px;background:transparent;cursor:pointer;font-family:inherit}
-.btn-signup{font-size:11px;color:#fff;background:var(--blue);border:none;border-radius:7px;padding:5px 12px;cursor:pointer;font-family:inherit;font-weight:700}
+/* ===== LAYOUT ===== */
+.layout{display:grid;grid-template-columns:300px 1fr 340px;grid-template-rows:64px 1fr;height:100vh;max-width:1600px;margin:0 auto;gap:0}
+@media(max-width:1100px){.layout{grid-template-columns:260px 1fr;grid-template-rows:64px 1fr}.right-panel{display:none}}
+@media(max-width:720px){.layout{grid-template-columns:1fr;grid-template-rows:56px auto 1fr}.left-panel{display:none}.mobile-search{display:block!important}}
 
-/* BOTTOM NAV */
-.bot-nav{display:flex;background:#fff;border-top:1px solid var(--border);position:sticky;bottom:0;z-index:300}
-.bot-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:.6rem .3rem;cursor:pointer;color:var(--text2);font-size:9px;font-weight:500;border:none;background:transparent;font-family:inherit}
-.bot-item.active{color:var(--blue)}
+/* ===== HEADER ===== */
+.header{grid-column:1/-1;background:var(--navy);display:flex;align-items:center;padding:0 1.5rem;gap:1rem;border-bottom:1px solid rgba(255,255,255,.08);position:sticky;top:0;z-index:1000}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;flex-shrink:0}
+.logo-emblem{width:38px;height:38px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:10px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px rgba(255,255,255,.1)}
+.logo-emblem svg{width:22px;height:22px}
+.logo-text{display:flex;flex-direction:column}
+.logo-ja{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:1px;line-height:1}
+.logo-en{font-size:8px;color:rgba(255,255,255,.45);letter-spacing:2px;margin-top:2px}
+.header-search{flex:1;max-width:560px;position:relative}
+.header-search input{width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:.6rem 1rem .6rem 2.8rem;font-size:13px;color:#fff;outline:none;font-family:inherit;transition:all .2s}
+.header-search input::placeholder{color:rgba(255,255,255,.35)}
+.header-search input:focus{background:rgba(255,255,255,.13);border-color:var(--blue-v)}
+.header-search .search-icon{position:absolute;left:.85rem;top:50%;transform:translateY(-50%);color:rgba(255,255,255,.4);font-size:14px}
+.header-actions{margin-left:auto;display:flex;align-items:center;gap:.6rem}
+.btn-outline{background:transparent;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:.45rem 1rem;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-outline:hover{background:rgba(255,255,255,.1);color:#fff}
+.btn-solid{background:var(--blue);color:#fff;border:none;border-radius:8px;padding:.45rem 1.1rem;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-solid:hover{background:var(--blue-v)}
+.beta-chip{background:var(--accent);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;letter-spacing:.5px}
 
-/* SEARCH */
-.search-header{background:var(--blue-d);padding:1rem 1.1rem .8rem}
-.beta-badge{background:#E65100;border-radius:7px;padding:4px 10px;font-size:10px;color:#fff;font-weight:700;display:inline-block;margin-bottom:.5rem}
-.sh-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:.6rem}
-.loc-row{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.12);border-radius:9px;padding:.55rem .9rem;margin-bottom:.7rem}
-.loc-row span{font-size:12px;color:#fff}
-.loc-change{font-size:10px;color:#90CAF9;margin-left:auto}
-.search-row{display:flex;gap:7px}
-.search-in{flex:1;border:none;border-radius:8px;padding:.6rem .9rem;font-size:13px;outline:none;font-family:inherit;background:#fff}
-.search-btn{background:var(--blue-m);color:#fff;border:none;border-radius:8px;padding:.6rem 14px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
-.filter-bar{display:flex;gap:6px;overflow-x:auto;padding:.7rem 1.1rem;border-bottom:1px solid var(--border);scrollbar-width:none}
-.filter-bar::-webkit-scrollbar{display:none}
-.fchip{white-space:nowrap;font-size:11px;padding:5px 13px;border-radius:16px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-family:inherit;font-weight:500}
-.fchip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
-.results-wrap{flex:1;overflow-y:auto;padding:.9rem 1.1rem}
-.tab-row{display:flex;gap:6px;margin-bottom:.8rem}
-.tab-btn{flex:1;padding:7px;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;border:1.5px solid var(--blue);background:#fff;color:var(--blue);font-family:inherit}
-.tab-btn.active{background:var(--blue);color:#fff}
-.results-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:.8rem}
-.results-count{font-size:12px;color:var(--text2)}
-.sort-btn{font-size:11px;color:var(--blue);background:var(--blue-l);border:none;border-radius:7px;padding:4px 10px;cursor:pointer;font-family:inherit}
-.s-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem;margin-bottom:.8rem;cursor:pointer;box-shadow:0 2px 12px rgba(21,101,192,.1)}
-.s-card-top{display:flex;gap:10px;margin-bottom:.7rem}
-.s-card-ico{width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.s-card-info{flex:1;min-width:0}
-.s-card-name{font-size:13px;font-weight:700;color:var(--blue-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.s-card-addr{font-size:10px;color:var(--text2)}
-.s-card-dist{font-size:13px;font-weight:700;color:var(--blue);white-space:nowrap}
-.s-card-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.6rem}
-.tag{font-size:9px;padding:2px 7px;border-radius:5px;font-weight:500}
-.tag-ok{background:var(--green-l);color:var(--green)}
-.tag-ng{background:var(--red-l);color:var(--red)}
-.tag-warn{background:var(--orange-l);color:var(--orange)}
-.tag-info{background:var(--blue-l);color:var(--blue)}
-.s-card-foot{display:flex;align-items:center;justify-content:space-between;padding-top:.6rem;border-top:1px solid var(--border)}
+/* ===== LEFT PANEL ===== */
+.left-panel{background:#fff;border-right:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.panel-header{padding:1rem 1.2rem .7rem;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:10}
+.panel-title{font-size:11px;font-weight:700;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin-bottom:.7rem}
+.filter-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{font-size:11px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:#fff;color:var(--text2);cursor:pointer;font-family:inherit;transition:all .18s;font-weight:500}
+.chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.spot-list{padding:.8rem;display:flex;flex-direction:column;gap:.6rem;flex:1}
+.spot-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:.9rem;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.spot-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:transparent;transition:background .2s}
+.spot-card:hover{border-color:var(--blue-v);box-shadow:0 2px 16px rgba(21,101,192,.1)}
+.spot-card:hover::before{background:var(--blue)}
+.spot-card.active{border-color:var(--blue);box-shadow:0 2px 16px rgba(21,101,192,.15)}
+.spot-card.active::before{background:var(--blue)}
+.sc-top{display:flex;gap:9px;margin-bottom:.6rem;align-items:flex-start}
+.sc-ico{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sc-info{flex:1;min-width:0}
+.sc-name{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.sc-addr{font-size:10px;color:var(--text2)}
+.sc-dist{font-size:12px;font-weight:700;color:var(--blue);white-space:nowrap}
+.sc-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:.5rem}
+.tag{font-size:9px;padding:2px 7px;border-radius:4px;font-weight:600}
+.tag-ok{background:#E8F5E9;color:#2E7D32}
+.tag-warn{background:#FFF3E0;color:#E65100}
+.tag-ng{background:#FFEBEE;color:#C62828}
+.tag-info{background:#E3F0FF;color:#1565C0}
+.sc-foot{display:flex;align-items:center;justify-content:space-between}
 .stars{color:#F9A825;font-size:11px}
 .rc{font-size:10px;color:var(--text2);margin-left:3px}
-.notice-box{border-radius:9px;padding:.7rem .9rem;margin-bottom:.8rem;font-size:11px}
-.notice-green{background:var(--green-l);border:1px solid #A5D6A7;color:var(--green)}
-.notice-orange{background:var(--orange-l);border:1px solid #FFCC80;color:var(--orange)}
-.src-note{font-size:9px;color:#9E9E9E;margin-top:4px}
 
-/* DETAIL */
-.detail-wrap{flex:1;overflow-y:auto}
-.d-back{display:flex;align-items:center;gap:6px;padding:.8rem 1.1rem;font-size:12px;color:var(--blue);cursor:pointer;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:10}
-.d-hero{width:100%;height:140px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.d-status{position:absolute;top:10px;right:10px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:9px}
-.d-status.beta{background:var(--orange-l);color:var(--orange)}
-.d-body{padding:1rem 1.1rem}
-.d-cat{font-size:10px;color:var(--blue);background:var(--blue-l);padding:3px 9px;border-radius:7px;display:inline-block;margin-bottom:.5rem;font-weight:500}
-.d-name{font-size:18px;font-weight:700;color:var(--blue-d);margin-bottom:.3rem}
-.d-addr{font-size:11px;color:var(--text2);margin-bottom:1rem}
-.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:1rem}
-.i-box{background:var(--blue-p);border:1px solid var(--blue-b);border-radius:8px;padding:.65rem .8rem}
-.i-lbl{font-size:9px;color:var(--text2);margin-bottom:3px}
-.i-val{font-size:12px;font-weight:700;color:var(--blue-d)}
-.sec-lbl{font-size:10px;color:var(--text2);letter-spacing:.5px;font-weight:700;margin-bottom:.6rem}
-.fac-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
-.fac{font-size:11px;color:var(--blue-d);background:var(--blue-l);padding:5px 10px;border-radius:7px}
-.rev-card{background:var(--blue-p);border:1px solid var(--blue-b);border-radius:9px;padding:.85rem;margin-bottom:.7rem}
-.rev-txt{font-size:11px;color:var(--text);line-height:1.7}
-.rev-name{font-size:10px;color:var(--text2);margin-top:5px}
-.divider{height:1px;background:var(--border);margin:.8rem 0}
-.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:9px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px}
-.btn-secondary{width:100%;background:#fff;color:var(--blue);border:1.5px solid var(--blue-b);border-radius:9px;padding:12px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+/* ===== MAP ===== */
+.map-container{position:relative;background:#E8EDF5}
+#gmap{width:100%;height:100%}
+.map-overlay{position:absolute;top:1rem;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none}
+.map-beta-badge{background:rgba(10,22,40,.85);color:#fff;font-size:11px;font-weight:700;padding:6px 14px;border-radius:20px;backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.1);white-space:nowrap}
+.map-beta-badge span{color:var(--accent)}
+.fab{position:absolute;bottom:1.5rem;right:1rem;width:48px;height:48px;background:var(--blue);border-radius:50%;border:none;cursor:pointer;box-shadow:0 4px 16px rgba(21,101,192,.4);display:flex;align-items:center;justify-content:center;font-size:20px;z-index:10;transition:transform .2s}
+.fab:hover{transform:scale(1.08)}
+.mobile-search{display:none;padding:.7rem;background:#fff;border-bottom:1px solid var(--border)}
+.mobile-search input{width:100%;border:1px solid var(--border);border-radius:10px;padding:.6rem 1rem;font-size:13px;outline:none;font-family:inherit}
 
-/* MAP */
-.map-wrap{flex:1;display:flex;flex-direction:column}
-.map-search{padding:.8rem 1.1rem;background:#fff;border-bottom:1px solid var(--border)}
-.map-view{flex:1;background:var(--blue-p);position:relative;overflow:hidden;min-height:300px}
-.map-road-h{position:absolute;background:rgba(255,255,255,.7);height:14px;border-radius:3px}
-.map-road-v{position:absolute;background:rgba(255,255,255,.7);width:14px;border-radius:3px}
-.map-pin{position:absolute;transform:translate(-50%,-100%);cursor:pointer;display:flex;flex-direction:column;align-items:center}
-.map-pin-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25);border:2px solid #fff;font-size:14px}
-.map-pin-label{font-size:9px;font-weight:700;background:#fff;border-radius:5px;padding:2px 6px;margin-top:2px;color:var(--blue-d);white-space:nowrap;box-shadow:0 1px 4px rgba(0,0,0,.15)}
-.map-you{position:absolute;transform:translate(-50%,-50%)}
-.map-you-dot{width:16px;height:16px;background:var(--blue);border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 3px rgba(21,101,192,.2)}
-.map-bottom-sheet{background:#fff;border-radius:14px 14px 0 0;box-shadow:0 -4px 20px rgba(21,101,192,.12);padding:.9rem 1.1rem}
-.mbs-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto .8rem}
-.mbs-title{font-size:12px;font-weight:700;color:var(--text2);margin-bottom:.7rem}
-.mbs-list{display:flex;flex-direction:column;gap:7px}
-.mbs-item{display:flex;align-items:center;gap:9px;padding:.65rem;background:var(--blue-p);border-radius:9px;border:1px solid var(--blue-b);cursor:pointer}
-.mbs-ico{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.mbs-info{flex:1;min-width:0}
-.mbs-name{font-size:12px;font-weight:700;color:var(--blue-d);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mbs-meta{font-size:10px;color:var(--text2);margin-top:1px}
-.mbs-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:6px}
+/* ===== RIGHT PANEL ===== */
+.right-panel{background:#fff;border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column}
+.detail-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;text-align:center;color:var(--text2)}
+.detail-empty .empty-icon{font-size:48px;margin-bottom:1rem;opacity:.4}
+.detail-empty p{font-size:13px;line-height:1.7}
+.detail-content{display:none;flex-direction:column;flex:1}
+.detail-content.show{display:flex}
+.d-hero{height:160px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;flex-shrink:0}
+.d-hero-bg{position:absolute;inset:0}
+.d-hero-icon{font-size:72px;opacity:.18;position:relative;z-index:1}
+.d-hero-badge{position:absolute;top:12px;right:12px;font-size:10px;font-weight:700;padding:4px 10px;border-radius:8px;z-index:2}
+.d-body{padding:1.2rem;flex:1;overflow-y:auto}
+.d-cat-chip{font-size:10px;color:var(--blue);background:var(--gray);padding:3px 9px;border-radius:6px;font-weight:700;display:inline-block;margin-bottom:.6rem}
+.d-name{font-size:20px;font-weight:900;color:var(--text);margin-bottom:.3rem;line-height:1.2}
+.d-addr{font-size:11px;color:var(--text2);margin-bottom:1.1rem}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.2rem}
+.i-card{background:var(--gray);border-radius:10px;padding:.75rem}
+.i-label{font-size:9px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:4px}
+.i-val{font-size:13px;font-weight:700;color:var(--text)}
+.fac-section{margin-bottom:1.2rem}
+.fac-title{font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:.6rem}
+.fac-grid{display:flex;flex-wrap:wrap;gap:5px}
+.fac-item{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text);background:var(--gray);padding:5px 10px;border-radius:8px;font-weight:500}
+.notice{background:#FFF3E0;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:.65rem .9rem;font-size:11px;color:#7A4000;margin-bottom:1rem;line-height:1.6}
+.rev-item{background:var(--gray);border-radius:10px;padding:.85rem;margin-bottom:.6rem}
+.rev-stars{color:#F9A825;font-size:11px;margin-bottom:.4rem}
+.rev-text{font-size:11px;color:var(--text);line-height:1.7}
+.rev-author{font-size:10px;color:var(--text2);margin-top:.4rem}
+.d-actions{padding:1rem 1.2rem;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:.6rem;background:#fff}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .2s}
+.btn-primary:hover{background:var(--blue-v)}
+.btn-secondary{width:100%;background:#fff;color:var(--blue);border:1.5px solid var(--blue);border-radius:10px;padding:11px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.btn-secondary:hover{background:var(--gray)}
 
-/* MY */
-.my-wrap{flex:1;overflow-y:auto;padding:1rem 1.1rem}
-.my-hero{background:linear-gradient(135deg,var(--blue),var(--blue-d));border-radius:12px;padding:1.4rem;margin-bottom:1rem;display:flex;align-items:center;gap:12px}
-.my-avatar{width:52px;height:52px;background:rgba(255,255,255,.2);border-radius:50%;border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:22px}
-.my-name{font-size:16px;font-weight:700;color:#fff;margin-bottom:3px}
-.my-plan{font-size:10px;color:#90CAF9;background:rgba(255,255,255,.15);padding:3px 10px;border-radius:9px;display:inline-block}
-.my-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
-.my-stat{background:var(--blue-p);border:1px solid var(--blue-b);border-radius:9px;padding:.8rem;text-align:center}
-.my-stat-n{font-size:18px;font-weight:700;color:var(--blue);display:block}
-.my-stat-l{font-size:10px;color:var(--text2);margin-top:2px}
-.menu-group{margin-bottom:1rem}
-.menu-title{font-size:11px;color:var(--text2);font-weight:700;letter-spacing:.5px;margin-bottom:.5rem}
-.menu-item{display:flex;align-items:center;gap:10px;padding:.9rem;background:#fff;border:1px solid var(--border);border-radius:9px;margin-bottom:6px;cursor:pointer}
-.menu-icon{width:34px;height:34px;border-radius:8px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:16px}
-.menu-label{flex:1;font-size:13px;color:var(--text);font-weight:500}
+/* ===== MOBILE BOTTOM NAV ===== */
+.mobile-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);z-index:200}
+@media(max-width:720px){
+  .mobile-nav{display:flex}
+  .layout{grid-template-rows:56px 1fr}
+  .map-container{min-height:calc(100vh - 56px - 56px)}
+}
+.mnav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:.6rem;font-size:9px;font-weight:700;color:var(--text2);cursor:pointer;border:none;background:transparent;font-family:inherit;letter-spacing:.3px}
+.mnav-item.active{color:var(--blue)}
+.mnav-item span{font-size:20px}
 
-/* CHECKIN */
-.checkin-wrap{flex:1;overflow-y:auto;padding:1rem 1.1rem}
-.ci-spot{background:var(--blue-p);border:1px solid var(--blue-b);border-radius:12px;padding:1rem;margin-bottom:1rem;display:flex;gap:10px;align-items:center}
-.ci-ico{width:44px;height:44px;border-radius:9px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.ci-name{font-size:13px;font-weight:700;color:var(--blue-d)}
-.ci-addr{font-size:10px;color:var(--text2);margin-top:2px}
-.ci-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:.8rem}
-.ci-option{border:1px solid var(--border);border-radius:9px;padding:.8rem;text-align:center;cursor:pointer}
-.ci-option.sel{border-color:var(--blue);background:var(--blue-l)}
-.ci-opt-icon{font-size:22px;margin-bottom:5px;display:block}
-.ci-opt-label{font-size:11px;font-weight:700;color:var(--text)}
-.ci-opt-sub{font-size:10px;color:var(--text2);margin-top:2px}
-.ci-complete{background:var(--green-l);border:1px solid #A5D6A7;border-radius:12px;padding:1.5rem;text-align:center;display:none}
-.ci-comp-icon{font-size:48px;display:block;margin-bottom:.8rem}
-.ci-comp-title{font-size:17px;font-weight:700;color:var(--green);margin-bottom:.5rem}
+/* ===== CHECKIN MODAL ===== */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,22,40,.6);z-index:500;align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:24px 24px 0 0;padding:1.5rem;width:100%;max-width:480px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.2rem}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:1rem}
+.opt-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem}
+.opt-item{border:1.5px solid var(--border);border-radius:12px;padding:.9rem;text-align:center;cursor:pointer;transition:all .18s}
+.opt-item.sel{border-color:var(--blue);background:#E3F0FF}
+.opt-icon{font-size:24px;display:block;margin-bottom:.4rem}
+.opt-label{font-size:12px;font-weight:700}
+.opt-sub{font-size:10px;color:var(--text2);margin-top:2px}
+.ci-complete{background:#E8F5E9;border-radius:16px;padding:1.5rem;text-align:center;display:none}
+.ci-comp-icon{font-size:48px;display:block;margin-bottom:.7rem}
+.ci-comp-title{font-size:16px;font-weight:700;color:#2E7D32;margin-bottom:.4rem}
 .ci-comp-text{font-size:12px;color:var(--text2);line-height:1.7}
-.btn-comp-back{margin-top:1rem;background:var(--blue);color:#fff;border:none;border-radius:9px;padding:12px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit}
+
+/* ===== SOURCE FOOTER ===== */
+.src-footer{padding:.6rem 1.2rem;background:var(--gray);border-top:1px solid var(--border);font-size:9px;color:var(--text2);line-height:1.6}
 </style>
 </head>
 <body>
-<div class="app">
 
-  <!-- TOP NAV -->
-  <div class="top-nav">
-    <div class="logo" onclick="showPage('search')">
-      <div class="logo-mark">
-        <svg width="19" height="19" viewBox="0 0 22 22" fill="none">
+<div class="layout">
+
+  <!-- HEADER -->
+  <header class="header">
+    <a class="logo" href="#">
+      <div class="logo-emblem">
+        <svg viewBox="0 0 22 22" fill="none">
           <rect x="1" y="6" width="20" height="12" rx="3" stroke="white" stroke-width="1.8"/>
-          <rect x="1" y="6" width="9" height="8" rx="2" fill="white" opacity="0.25"/>
+          <rect x="1" y="6" width="9" height="8" rx="2" fill="white" opacity="0.3"/>
           <circle cx="6" cy="18" r="2.8" fill="white"/>
           <circle cx="17" cy="18" r="2.8" fill="white"/>
         </svg>
       </div>
-      <div>
-        <span class="logo-name">ファイトラック</span>
-        <span class="logo-sub">TRUCK REST FINDER</span>
+      <div class="logo-text">
+        <span class="logo-ja">ファイトラック</span>
+        <span class="logo-en">TRUCK REST FINDER</span>
       </div>
+    </a>
+    <div class="header-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="施設名・エリア・設備で検索..." id="main-search">
     </div>
-    <div style="display:flex;gap:8px">
-      <button class="btn-login">ログイン</button>
-      <button class="btn-signup">無料登録</button>
+    <div class="header-actions">
+      <span class="beta-chip">β版</span>
+      <button class="btn-outline">ログイン</button>
+      <button class="btn-solid">無料登録</button>
     </div>
+  </header>
+
+  <!-- MOBILE SEARCH -->
+  <div class="mobile-search">
+    <input type="text" placeholder="施設名・エリアで検索...">
   </div>
 
-  <!-- 検索ページ -->
-  <div class="page active" id="page-search">
-    <div class="search-header">
-      <div class="beta-badge">🚧 β版 · データ順次追加中</div>
-      <div class="sh-title">🗺️ 休憩スポットを探す</div>
-      <div class="loc-row">
-        <span>📍 現在地：岐阜県 郡上市付近</span>
-        <span class="loc-change">変更 ›</span>
-      </div>
-      <div class="search-row">
-        <input class="search-in" type="text" placeholder="施設名・条件で検索" value="大型駐車 シャワー">
-        <button class="search-btn" onclick="alert('β版では位置情報検索を準備中です')">🔍 検索</button>
-      </div>
-    </div>
-    <div class="filter-bar">
-      <button class="fchip on" onclick="this.classList.toggle('on')">大型駐車可</button>
-      <button class="fchip on" onclick="this.classList.toggle('on')">シャワー</button>
-      <button class="fchip" onclick="this.classList.toggle('on')">仮眠室</button>
-      <button class="fchip" onclick="this.classList.toggle('on')">食堂</button>
-      <button class="fchip" onclick="this.classList.toggle('on')">Wi-Fi</button>
-      <button class="fchip" onclick="this.classList.toggle('on')">24時間</button>
-    </div>
-    <div class="results-wrap">
-      <div class="tab-row">
-        <button class="tab-btn active" id="tab-demo" onclick="switchTab('demo')">🎭 デモデータ</button>
-        <button class="tab-btn" id="tab-real" onclick="switchTab('real')">✅ 実データ（岐阜県）</button>
-      </div>
-
-      <!-- デモタブ -->
-      <div id="demo-tab">
-        <div class="notice-box notice-orange">⚠️ デモデータです。実際の空き情報ではありません。</div>
-        <div class="results-meta">
-          <span class="results-count">サンプル 3件表示中</span>
-          <button class="sort-btn">距離順 ▾</button>
-        </div>
-        <div class="s-card" onclick="showDetail(1)">
-          <div class="s-card-top">
-            <div class="s-card-ico" style="background:#1565C0">🏢</div>
-            <div class="s-card-info">
-              <div class="s-card-name">富士川SA（下り）</div>
-              <div class="s-card-addr">静岡県富士市岩渕 · 東名高速道路</div>
-            </div>
-            <div class="s-card-dist">2.1km</div>
-          </div>
-          <div class="s-card-tags">
-            <span class="tag tag-warn">β版サンプル</span>
-            <span class="tag tag-info">大型32台</span>
-            <span class="tag tag-info">シャワー</span>
-            <span class="tag tag-info">仮眠室</span>
-            <span class="tag tag-info">24h</span>
-          </div>
-          <div class="s-card-foot">
-            <div><span class="stars">★★★★★</span><span class="rc">（β版では未収録）</span></div>
-            <span style="font-size:11px;color:var(--blue)">詳細 ›</span>
-          </div>
-        </div>
-        <div class="s-card" onclick="showDetail(2)">
-          <div class="s-card-top">
-            <div class="s-card-ico" style="background:#2E7D32">🏪</div>
-            <div class="s-card-info">
-              <div class="s-card-name">道の駅 富士川楽座</div>
-              <div class="s-card-addr">静岡県富士市岩渕 · 国道52号</div>
-            </div>
-            <div class="s-card-dist">3.8km</div>
-          </div>
-          <div class="s-card-tags">
-            <span class="tag tag-warn">β版サンプル</span>
-            <span class="tag tag-info">大型15台</span>
-            <span class="tag tag-info">シャワー</span>
-            <span class="tag tag-ng">仮眠室なし</span>
-          </div>
-          <div class="s-card-foot">
-            <div><span class="stars">★★★★☆</span><span class="rc">（β版では未収録）</span></div>
-            <span style="font-size:11px;color:var(--blue)">詳細 ›</span>
-          </div>
-        </div>
-        <div class="s-card" onclick="showDetail(3)">
-          <div class="s-card-top">
-            <div class="s-card-ico" style="background:#6A1B9A">🚛</div>
-            <div class="s-card-info">
-              <div class="s-card-name">富士トラックステーション</div>
-              <div class="s-card-addr">静岡県富士市伝法</div>
-            </div>
-            <div class="s-card-dist">5.2km</div>
-          </div>
-          <div class="s-card-tags">
-            <span class="tag tag-warn">β版サンプル</span>
-            <span class="tag tag-info">大型80台</span>
-            <span class="tag tag-info">シャワー</span>
-            <span class="tag tag-info">仮眠室</span>
-            <span class="tag tag-info">食堂</span>
-          </div>
-          <div class="s-card-foot">
-            <div><span class="stars">★★★★☆</span><span class="rc">（β版では未収録）</span></div>
-            <span style="font-size:11px;color:var(--blue)">詳細 ›</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 実データタブ -->
-      <div id="real-tab" style="display:none">
-        <div class="notice-box notice-green">
-          ✅ 公式ソースからの実データです<br>
-          ・道の駅 → 国土交通省 国土数値情報<br>
-          ・トラックST → 全日本トラック協会 公式リスト
-        </div>
-        <div id="real-list"></div>
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-header">
+      <div class="panel-title">絞り込み</div>
+      <div class="filter-chips">
+        <button class="chip on" onclick="this.classList.toggle('on')">大型駐車可</button>
+        <button class="chip on" onclick="this.classList.toggle('on')">シャワー</button>
+        <button class="chip" onclick="this.classList.toggle('on')">仮眠室</button>
+        <button class="chip" onclick="this.classList.toggle('on')">食堂</button>
+        <button class="chip" onclick="this.classList.toggle('on')">Wi-Fi</button>
+        <button class="chip" onclick="this.classList.toggle('on')">24時間</button>
+        <button class="chip" onclick="this.classList.toggle('on')">コンビニ</button>
       </div>
     </div>
+    <div class="spot-list" id="spot-list"></div>
   </div>
 
-  <!-- 詳細ページ -->
-  <div class="page" id="page-detail">
-    <div class="detail-wrap">
-      <div class="d-back" onclick="showPage('search')">← 検索結果に戻る</div>
-      <div class="d-hero" id="d-hero" style="background:linear-gradient(135deg,#1565C0,#0D47A1)">
-        <div style="font-size:60px;opacity:.25">🚛</div>
-        <span class="d-status beta" id="d-status">β版サンプル</span>
+  <!-- MAP -->
+  <div class="map-container">
+    <div id="gmap"></div>
+    <div class="map-overlay">
+      <div class="map-beta-badge">🚧 β版 · <span>実データ（岐阜県・静岡県）</span>を表示中</div>
+    </div>
+    <button class="fab" onclick="locateMe()" title="現在地">📍</button>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel" id="right-panel">
+    <div class="detail-empty" id="detail-empty">
+      <div class="empty-icon">🗺️</div>
+      <p>地図上のピンまたは<br>左のリストから<br>スポットを選んでください</p>
+    </div>
+    <div class="detail-content" id="detail-content">
+      <div class="d-hero" id="d-hero">
+        <div class="d-hero-bg" id="d-hero-bg"></div>
+        <div class="d-hero-icon" id="d-hero-icon">🏢</div>
+        <span class="d-hero-badge tag-warn" id="d-badge">β版サンプル</span>
       </div>
       <div class="d-body">
-        <div class="d-cat" id="d-cat">高速SA</div>
+        <div class="d-cat-chip" id="d-cat">高速SA</div>
         <div class="d-name" id="d-name">富士川SA（下り）</div>
-        <div class="d-addr" id="d-addr">📍 静岡県富士市岩渕 東名高速道路</div>
+        <div class="d-addr" id="d-addr">📍 静岡県富士市岩渕</div>
         <div class="info-grid">
-          <div class="i-box"><div class="i-lbl">大型駐車台数</div><div class="i-val" id="d-slots">32台（※公式要確認）</div></div>
-          <div class="i-box"><div class="i-lbl">営業時間</div><div class="i-val" id="d-hours">24時間営業</div></div>
-          <div class="i-box"><div class="i-lbl">シャワー料金</div><div class="i-val" id="d-shower">330円（※要確認）</div></div>
-          <div class="i-box"><div class="i-lbl">仮眠室料金</div><div class="i-val" id="d-sleep">1,100円（※要確認）</div></div>
+          <div class="i-card"><div class="i-label">大型駐車</div><div class="i-val" id="d-slots">32台（※要確認）</div></div>
+          <div class="i-card"><div class="i-label">営業時間</div><div class="i-val" id="d-hours">24時間</div></div>
+          <div class="i-card"><div class="i-label">シャワー</div><div class="i-val" id="d-shower">330円／30分</div></div>
+          <div class="i-card"><div class="i-label">仮眠室</div><div class="i-val" id="d-sleep">1,100円／泊</div></div>
         </div>
-        <div class="sec-lbl">設備・サービス</div>
-        <div class="fac-wrap">
-          <span class="fac">🚿 シャワー</span>
-          <span class="fac">🛏️ 仮眠室</span>
-          <span class="fac">🍽️ 食堂</span>
-          <span class="fac">📶 Wi-Fi</span>
-          <span class="fac">🏪 コンビニ</span>
-          <span class="fac">🔌 電源あり</span>
+        <div class="fac-section">
+          <div class="fac-title">設備・サービス</div>
+          <div class="fac-grid" id="d-facs"></div>
         </div>
-        <div class="divider"></div>
-        <div class="sec-lbl">ドライバーの口コミ</div>
-        <div class="notice-box notice-orange">⚠️ β版のため口コミはサンプルです。正式リリース後に実際の投稿が表示されます。</div>
-        <div class="rev-card">
-          <div><span class="stars">★★★★★</span></div>
-          <div class="rev-txt">「シャワーがきれいで快適。仮眠室も静かでゆっくり休めた。富士川SAはドライバーに優しい設備が揃っておすすめです。」</div>
-          <div class="rev-name">長距離ドライバー・50代・サンプル</div>
+        <div class="notice">⚠️ β版のため一部情報はサンプルです。利用前に必ず公式情報をご確認ください。</div>
+        <div class="fac-title">ドライバーの口コミ</div>
+        <div class="rev-item">
+          <div class="rev-stars">★★★★★</div>
+          <div class="rev-text" id="d-rev">「シャワーがきれいで快適。仮眠室も静かでゆっくり休めました。」</div>
+          <div class="rev-author">長距離ドライバー・50代（β版サンプル）</div>
         </div>
-        <div style="height:.8rem"></div>
-        <button class="btn-primary" onclick="showPage('checkin')">📍 ここに向かう・チェックイン</button>
-        <button class="btn-secondary">♡ お気に入りに追加</button>
-        <div style="height:1rem"></div>
       </div>
+      <div class="d-actions">
+        <button class="btn-primary" id="d-map-btn" onclick="">🗺️ Google マップで開く</button>
+        <button class="btn-secondary" onclick="showCheckin()">✅ チェックイン</button>
+      </div>
+      <div class="src-footer" id="d-src">出典：−</div>
     </div>
   </div>
 
-  <!-- 地図ページ -->
-  <div class="page" id="page-map">
-    <div class="map-wrap">
-      <div class="map-search">
-        <div class="search-row">
-          <input class="search-in" type="text" placeholder="エリア・施設名で検索" style="border:1px solid var(--border)">
-          <button class="search-btn">🔍 検索</button>
-        </div>
-      </div>
-      <div class="map-view">
-        <div class="map-road-h" style="top:40%;left:0;right:0"></div>
-        <div class="map-road-h" style="top:65%;left:0;right:0;height:9px;opacity:.5"></div>
-        <div class="map-road-v" style="left:30%;top:0;bottom:0"></div>
-        <div class="map-road-v" style="left:68%;top:0;bottom:0;width:9px;opacity:.5"></div>
-        <div class="map-pin" style="top:42%;left:55%" onclick="showDetail(1)">
-          <div class="map-pin-dot" style="background:#1565C0">🏢</div>
-          <div class="map-pin-label">富士川SA</div>
-        </div>
-        <div class="map-pin" style="top:60%;left:28%" onclick="showDetail(2)">
-          <div class="map-pin-dot" style="background:#2E7D32">🏪</div>
-          <div class="map-pin-label">道の駅</div>
-        </div>
-        <div class="map-pin" style="top:55%;left:70%" onclick="showDetail(3)">
-          <div class="map-pin-dot" style="background:#6A1B9A">🚛</div>
-          <div class="map-pin-label">トラックST</div>
-        </div>
-        <div class="map-you" style="top:43%;left:44%">
-          <div class="map-you-dot"></div>
-        </div>
-      </div>
-      <div class="map-bottom-sheet">
-        <div class="mbs-handle"></div>
-        <div class="mbs-title">近くのスポット（β版サンプル）</div>
-        <div class="mbs-list">
-          <div class="mbs-item" onclick="showDetail(1)">
-            <div class="mbs-ico" style="background:#1565C0">🏢</div>
-            <div class="mbs-info">
-              <div class="mbs-name">富士川SA（下り）</div>
-              <div class="mbs-meta">大型32台 · シャワー · 仮眠室 · 2.1km</div>
-            </div>
-            <span class="mbs-badge tag-warn" style="font-size:9px;padding:2px 7px;border-radius:6px">β版</span>
-          </div>
-          <div class="mbs-item" onclick="showDetail(2)">
-            <div class="mbs-ico" style="background:#2E7D32">🏪</div>
-            <div class="mbs-info">
-              <div class="mbs-name">道の駅 富士川楽座</div>
-              <div class="mbs-meta">大型15台 · シャワー · 3.8km</div>
-            </div>
-            <span class="mbs-badge tag-warn" style="font-size:9px;padding:2px 7px;border-radius:6px">β版</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+</div>
 
-  <!-- チェックインページ -->
-  <div class="page" id="page-checkin">
-    <div class="checkin-wrap">
-      <div style="font-size:14px;font-weight:700;margin-bottom:.9rem">チェックイン</div>
-      <div class="ci-spot">
-        <div class="ci-ico">🏢</div>
-        <div>
-          <div class="ci-name">富士川SA（下り）</div>
-          <div class="ci-addr">静岡県富士市岩渕 · 東名高速道路 · 2.1km</div>
-        </div>
-      </div>
-      <div style="font-size:12px;font-weight:700;margin-bottom:.6rem">利用する設備を選んでください</div>
-      <div class="ci-options">
-        <div class="ci-option sel" onclick="toggleOpt(this)">
-          <span class="ci-opt-icon">🅿️</span>
-          <div class="ci-opt-label">駐車のみ</div>
-          <div class="ci-opt-sub">無料</div>
-        </div>
-        <div class="ci-option" onclick="toggleOpt(this)">
-          <span class="ci-opt-icon">🚿</span>
-          <div class="ci-opt-label">シャワー</div>
-          <div class="ci-opt-sub">330円／30分</div>
-        </div>
-        <div class="ci-option" onclick="toggleOpt(this)">
-          <span class="ci-opt-icon">🛏️</span>
-          <div class="ci-opt-label">仮眠室</div>
-          <div class="ci-opt-sub">1,100円／泊</div>
-        </div>
-        <div class="ci-option" onclick="toggleOpt(this)">
-          <span class="ci-opt-icon">🍽️</span>
-          <div class="ci-opt-label">食事</div>
-          <div class="ci-opt-sub">食堂あり</div>
-        </div>
-      </div>
-      <button class="btn-primary" id="ci-btn" onclick="doCheckin()">✅ チェックインする</button>
-      <div class="ci-complete" id="ci-complete">
-        <span class="ci-comp-icon">✅</span>
-        <div class="ci-comp-title">チェックイン完了！</div>
-        <div class="ci-comp-text">ゆっくり休んでください 🙏<br>口コミを投稿して仲間のドライバーに教えてあげましょう！</div>
-        <button class="btn-comp-back" onclick="showPage('search')">🔍 検索に戻る</button>
-      </div>
-    </div>
-  </div>
+<!-- MOBILE BOTTOM NAV -->
+<nav class="mobile-nav">
+  <button class="mnav-item active"><span>🔍</span>検索</button>
+  <button class="mnav-item"><span>🗺️</span>地図</button>
+  <button class="mnav-item"><span>📍</span>チェックイン</button>
+  <button class="mnav-item"><span>👤</span>マイページ</button>
+</nav>
 
-  <!-- マイページ -->
-  <div class="page" id="page-my">
-    <div class="my-wrap">
-      <div class="my-hero">
-        <div class="my-avatar">🚛</div>
-        <div>
-          <div class="my-name">ドライバーさん</div>
-          <span class="my-plan">個人プラン · ¥500/月</span>
-        </div>
+<!-- CHECKIN MODAL -->
+<div class="modal-overlay" id="ci-modal" onclick="closeCheckin(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ci-title">チェックイン</div>
+    <div id="ci-form">
+      <div class="opt-grid">
+        <div class="opt-item sel" onclick="selOpt(this)"><span class="opt-icon">🅿️</span><div class="opt-label">駐車のみ</div><div class="opt-sub">無料</div></div>
+        <div class="opt-item" onclick="selOpt(this)"><span class="opt-icon">🚿</span><div class="opt-label">シャワー</div><div class="opt-sub">330円/30分</div></div>
+        <div class="opt-item" onclick="selOpt(this)"><span class="opt-icon">🛏️</span><div class="opt-label">仮眠室</div><div class="opt-sub">1,100円/泊</div></div>
+        <div class="opt-item" onclick="selOpt(this)"><span class="opt-icon">🍽️</span><div class="opt-label">食事</div><div class="opt-sub">食堂あり</div></div>
       </div>
-      <div class="my-stats">
-        <div class="my-stat"><span class="my-stat-n">0</span><span class="my-stat-l">チェックイン</span></div>
-        <div class="my-stat"><span class="my-stat-n">0</span><span class="my-stat-l">口コミ投稿</span></div>
-        <div class="my-stat"><span class="my-stat-n">0</span><span class="my-stat-l">お気に入り</span></div>
-      </div>
-      <div class="menu-group">
-        <div class="menu-title">履歴・お気に入り</div>
-        <div class="menu-item"><div class="menu-icon">🕐</div><span class="menu-label">チェックイン履歴</span><span>›</span></div>
-        <div class="menu-item"><div class="menu-icon">♡</div><span class="menu-label">お気に入りスポット</span><span>›</span></div>
-      </div>
-      <div class="menu-group">
-        <div class="menu-title">設定</div>
-        <div class="menu-item"><div class="menu-icon">🚛</div><span class="menu-label">車両情報</span><span>›</span></div>
-        <div class="menu-item"><div class="menu-icon">💳</div><span class="menu-label">プラン・お支払い</span><span>›</span></div>
-        <div class="menu-item"><div class="menu-icon">👤</div><span class="menu-label">アカウント設定</span><span>›</span></div>
-      </div>
-      <div style="padding:1rem;background:var(--blue-p);border-radius:10px;border:1px solid var(--blue-b);font-size:11px;color:var(--text2);line-height:1.7">
-        📋 データ出典<br>
-        ・道の駅情報：国土交通省 国土数値情報<br>
-        ・トラックステーション：全日本トラック協会<br>
-        ・SA・PA情報：NEXCO東日本・中日本・西日本
-      </div>
-      <div style="height:1rem"></div>
+      <button class="btn-primary" onclick="doCheckin()">✅ チェックインする</button>
     </div>
-  </div>
-
-  <!-- BOTTOM NAV -->
-  <div class="bot-nav">
-    <button class="bot-item active" id="nav-search" onclick="showPage('search')">🔍<br>検索</button>
-    <button class="bot-item" id="nav-map" onclick="showPage('map')">🗺️<br>地図</button>
-    <button class="bot-item" id="nav-checkin" onclick="showPage('checkin')">📍<br>チェックイン</button>
-    <button class="bot-item" id="nav-my" onclick="showPage('my')">👤<br>マイページ</button>
+    <div class="ci-complete" id="ci-complete">
+      <span class="ci-comp-icon">✅</span>
+      <div class="ci-comp-title">チェックイン完了！</div>
+      <div class="ci-comp-text">ゆっくり休んでください 🙏<br>帰りに口コミを投稿して仲間に教えてあげましょう！</div>
+      <button class="btn-primary" style="margin-top:1rem" onclick="closeCheckin()">閉じる</button>
+    </div>
   </div>
 </div>
 
 <script>
-// 実データ（公式ソース）
-const REAL_DATA = [
-  { name:'道の駅 柳津', addr:'岐阜県海津市南濃町柳津338-1', tel:'0584-55-0201',
-    shower:false, sleep:false, restaurant:true, hours:'9:00〜18:00', src:'国土交通省 国土数値情報' },
-  { name:'道の駅 美濃にわか茶屋', addr:'岐阜県美濃市極楽寺358-1', tel:'0575-35-3755',
-    shower:true, sleep:false, restaurant:true, hours:'9:00〜18:00', src:'国土交通省 国土数値情報' },
-  { name:'道の駅 平成', addr:'岐阜県郡上市美並町三戸835-1', tel:'0575-79-3030',
-    shower:true, sleep:false, restaurant:true, hours:'8:30〜18:00', src:'国土交通省 国土数値情報' },
-  { name:'道の駅 古今伝授の里やまと', addr:'岐阜県郡上市大和町剣354', tel:'0575-88-3244',
-    shower:false, sleep:false, restaurant:true, hours:'9:00〜18:00', src:'国土交通省 国土数値情報' },
-  { name:'岐阜トラックステーション', addr:'岐阜県岐阜市日置江1-61', tel:'058-271-3131',
-    shower:true, sleep:true, restaurant:true, hours:'24時間', src:'全日本トラック協会 公式リスト' },
-  { name:'名古屋トラックステーション', addr:'愛知県名古屋市港区小碓2-203', tel:'052-303-1161',
-    shower:true, sleep:true, restaurant:true, hours:'24時間', src:'全日本トラック協会 公式リスト' },
+// ===== スポットデータ =====
+const SPOTS = [
+  // 実データ：全日本トラック協会 公式リスト
+  { id:1, name:'岐阜トラックステーション', cat:'トラックST', icon:'🚛',
+    addr:'岐阜県岐阜市日置江1-61', lat:35.3547, lng:136.7312,
+    slots:'大型60台', hours:'24時間', shower:'あり', sleep:'あり',
+    facs:['🚿シャワー','🛏️仮眠室','🍽️食堂','📶Wi-Fi','🔌電源'],
+    rev:'「24時間使えてシャワーも仮眠室もある。長距離の必需品。」',
+    color:'#6A1B9A', src:'全日本トラック協会 公式リスト', real:true },
+  // 実データ：国土交通省 国土数値情報
+  { id:2, name:'道の駅 美濃にわか茶屋', cat:'道の駅', icon:'🏪',
+    addr:'岐阜県美濃市極楽寺358-1', lat:35.5387, lng:136.9107,
+    slots:'大型対応', hours:'9:00〜18:00', shower:'あり', sleep:'なし',
+    facs:['🚿シャワー','🍽️食堂','🅿️大型駐車'],
+    rev:'「道の駅の中でシャワーがある珍しい施設。清潔で使いやすい。」',
+    color:'#2E7D32', src:'国土交通省 国土数値情報', real:true },
+  { id:3, name:'道の駅 平成', cat:'道の駅', icon:'🏪',
+    addr:'岐阜県郡上市美並町三戸835-1', lat:35.8052, lng:136.9534,
+    slots:'大型対応', hours:'8:30〜18:00', shower:'あり', sleep:'なし',
+    facs:['🚿シャワー','🍽️食堂','🅿️大型駐車'],
+    rev:'「郡上エリアでシャワー使える貴重なスポット。」',
+    color:'#2E7D32', src:'国土交通省 国土数値情報', real:true },
+  // デモデータ
+  { id:4, name:'富士川SA（下り）', cat:'高速SA', icon:'🏢',
+    addr:'静岡県富士市岩渕 東名高速道路', lat:35.1654, lng:138.6821,
+    slots:'32台（※要確認）', hours:'24時間', shower:'330円/30分', sleep:'1,100円/泊',
+    facs:['🚿シャワー','🛏️仮眠室','🍽️食堂','📶Wi-Fi','🏪コンビニ','🔌電源'],
+    rev:'「シャワーがきれいで快適。仮眠室も静かでゆっくり休めました。」',
+    color:'#1565C0', src:'β版サンプルデータ', real:false },
+  { id:5, name:'富士トラックステーション', cat:'トラックST', icon:'🚛',
+    addr:'静岡県富士市伝法', lat:35.1789, lng:138.6543,
+    slots:'80台（※要確認）', hours:'24時間', shower:'330円/30分', sleep:'1,200円/泊',
+    facs:['🚿シャワー','🛏️仮眠室','🍽️食堂','📶Wi-Fi','🅿️大型駐車'],
+    rev:'「広くて停めやすい。食堂のご飯が美味しい。」',
+    color:'#6A1B9A', src:'β版サンプルデータ', real:false },
 ];
 
-function loadRealData() {
-  const list = document.getElementById('real-list');
+let map, markers = [], activeId = null;
+
+// ===== スポットリスト描画 =====
+function renderList() {
+  const list = document.getElementById('spot-list');
   list.innerHTML = '';
-  REAL_DATA.forEach(s => {
-    const tags = ['<span class="tag tag-info">大型駐車可</span>'];
-    if(s.shower) tags.push('<span class="tag tag-info">シャワー</span>');
-    if(s.sleep)  tags.push('<span class="tag tag-info">仮眠室</span>');
-    if(s.restaurant) tags.push('<span class="tag tag-info">食堂</span>');
-    const isTS = s.src.includes('トラック協会');
-    list.innerHTML += `
-      <div class="s-card" style="border-left:3px solid ${isTS?'#6A1B9A':'#2E7D32'}">
-        <div class="s-card-top">
-          <div class="s-card-ico" style="background:${isTS?'#6A1B9A':'#2E7D32'}">${isTS?'🚛':'🏪'}</div>
-          <div class="s-card-info">
-            <div class="s-card-name">${s.name}</div>
-            <div class="s-card-addr">${s.addr}</div>
-          </div>
-          <span class="tag tag-ok" style="align-self:flex-start">${isTS?'TS':'道の駅'}</span>
+  SPOTS.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'spot-card' + (s.id===activeId?' active':'');
+    div.onclick = () => selectSpot(s.id);
+    div.innerHTML = `
+      <div class="sc-top">
+        <div class="sc-ico" style="background:${s.color}20;font-size:20px">${s.icon}</div>
+        <div class="sc-info">
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-addr">${s.addr}</div>
         </div>
-        <div class="s-card-tags">${tags.join('')}</div>
-        <div style="font-size:10px;color:var(--text2);margin-top:5px;padding-top:5px;border-top:1px solid var(--border)">
-          🕐 ${s.hours}　📞 ${s.tel}
-        </div>
-        <div class="src-note">出典：${s.src}</div>
+      </div>
+      <div class="sc-tags">
+        <span class="tag ${s.real?'tag-ok':'tag-warn'}">${s.real?'✅ 実データ':'β版'}</span>
+        <span class="tag tag-info">${s.cat}</span>
+        ${s.facs.slice(0,3).map(f=>`<span class="tag tag-info">${f}</span>`).join('')}
+      </div>
+      <div class="sc-foot">
+        <div><span class="stars">★★★★${s.real?'★':'☆'}</span><span class="rc">${s.real?'実データ':'サンプル'}</span></div>
+        <span style="font-size:10px;color:var(--blue)">詳細 ›</span>
       </div>`;
+    list.appendChild(div);
   });
 }
 
-function switchTab(t) {
-  document.getElementById('tab-demo').classList.toggle('active', t==='demo');
-  document.getElementById('tab-real').classList.toggle('active', t==='real');
-  document.getElementById('demo-tab').style.display = t==='demo'?'block':'none';
-  document.getElementById('real-tab').style.display = t==='real'?'block':'none';
-  if(t==='real') loadRealData();
-}
+// ===== 詳細パネル =====
+function selectSpot(id) {
+  activeId = id;
+  const s = SPOTS.find(x=>x.id===id);
+  if(!s) return;
 
-const SPOTS = {
-  1:{name:'富士川SA（下り）',cat:'高速SA',addr:'静岡県富士市岩渕 東名高速道路',slots:'32台（※公式要確認）',hours:'24時間営業',shower:'330円（※要確認）',sleep:'1,100円（※要確認）',bg:'#1565C0'},
-  2:{name:'道の駅 富士川楽座',cat:'道の駅',addr:'静岡県富士市岩渕 国道52号',slots:'15台（※公式要確認）',hours:'7:00〜22:00',shower:'（※要確認）',sleep:'なし',bg:'#2E7D32'},
-  3:{name:'富士トラックステーション',cat:'トラックST',addr:'静岡県富士市伝法',slots:'80台（※公式要確認）',hours:'24時間営業',shower:'330円（※要確認）',sleep:'（※要確認）',bg:'#6A1B9A'},
-};
-
-function showDetail(n) {
-  const s = SPOTS[n];
-  document.getElementById('d-name').textContent = s.name;
+  document.getElementById('detail-empty').style.display = 'none';
+  document.getElementById('detail-content').classList.add('show');
+  document.getElementById('d-hero-bg').style.background = `linear-gradient(135deg,${s.color},${s.color}88)`;
+  document.getElementById('d-hero-icon').textContent = s.icon;
+  document.getElementById('d-badge').textContent = s.real ? '✅ 実データ' : 'β版サンプル';
+  document.getElementById('d-badge').className = 'd-hero-badge ' + (s.real?'tag-ok':'tag-warn');
   document.getElementById('d-cat').textContent = s.cat;
+  document.getElementById('d-name').textContent = s.name;
   document.getElementById('d-addr').textContent = '📍 ' + s.addr;
   document.getElementById('d-slots').textContent = s.slots;
   document.getElementById('d-hours').textContent = s.hours;
   document.getElementById('d-shower').textContent = s.shower;
   document.getElementById('d-sleep').textContent = s.sleep;
-  document.getElementById('d-hero').style.background = `linear-gradient(135deg,${s.bg},#0D1B2A)`;
-  showPage('detail');
+  document.getElementById('d-facs').innerHTML = s.facs.map(f=>`<span class="fac-item">${f}</span>`).join('');
+  document.getElementById('d-rev').textContent = s.rev;
+  document.getElementById('d-src').textContent = '出典：' + s.src;
+  document.getElementById('d-map-btn').onclick = () => {
+    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name+' '+s.addr)}`,'_blank');
+  };
+  document.getElementById('ci-title').textContent = s.name + ' にチェックイン';
+
+  renderList();
+  if(map && markers[id]) map.panTo(markers[id].getPosition());
 }
 
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
-  document.querySelectorAll('.bot-item').forEach(b=>b.classList.remove('active'));
-  const nb = document.getElementById('nav-'+id);
-  if(nb) nb.classList.add('active');
-  window.scrollTo(0,0);
+// ===== Google Maps =====
+function initMap() {
+  map = new google.maps.Map(document.getElementById('gmap'), {
+    center:{lat:35.5, lng:137.2},
+    zoom:8,
+    styles:[
+      {featureType:'all',elementType:'geometry',stylers:[{color:'#E8EDF5'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#fff'}]},
+      {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#C5D5E8'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#B3CCE8'}]},
+      {featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]},
+    ],
+    disableDefaultUI:true,
+    zoomControl:true,
+    mapTypeControl:false,
+  });
+
+  SPOTS.forEach(s => {
+    const marker = new google.maps.Marker({
+      position:{lat:s.lat, lng:s.lng},
+      map,
+      title:s.name,
+      icon:{
+        path:google.maps.SymbolPath.CIRCLE,
+        scale:s.real ? 14 : 11,
+        fillColor:s.color,
+        fillOpacity:1,
+        strokeColor:'#fff',
+        strokeWeight:2.5,
+      },
+      label:{text:s.icon, fontSize:'12px'}
+    });
+    marker.addListener('click', ()=>selectSpot(s.id));
+    markers[s.id] = marker;
+  });
 }
 
-function toggleOpt(el) {
-  document.querySelectorAll('.ci-option').forEach(o=>o.classList.remove('sel'));
-  el.classList.add('sel');
+function locateMe() {
+  if(!navigator.geolocation){alert('位置情報が使えません');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const loc = {lat:pos.coords.latitude, lng:pos.coords.longitude};
+    if(map) map.panTo(loc);
+    new google.maps.Marker({position:loc, map, title:'現在地',
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:8,fillColor:'#1565C0',fillOpacity:1,strokeColor:'#fff',strokeWeight:3}
+    });
+  });
 }
 
-function doCheckin() {
-  document.getElementById('ci-btn').style.display='none';
+// ===== チェックイン =====
+function showCheckin(){
+  document.getElementById('ci-form').style.display='block';
+  document.getElementById('ci-complete').style.display='none';
+  document.getElementById('ci-modal').classList.add('show');
+}
+function closeCheckin(e){
+  if(!e||e.target===document.getElementById('ci-modal'))
+    document.getElementById('ci-modal').classList.remove('show');
+}
+function selOpt(el){document.querySelectorAll('.opt-item').forEach(o=>o.classList.remove('sel'));el.classList.add('sel')}
+function doCheckin(){
+  document.getElementById('ci-form').style.display='none';
   document.getElementById('ci-complete').style.display='block';
 }
+
+renderList();
 </script>
+
+<!-- Google Maps API（本番では自分のAPIキーに差し替え） -->
+<script>
+// APIキーなしのフォールバック表示
+window.addEventListener('load', function() {
+  if(typeof google === 'undefined') {
+    const mapDiv = document.getElementById('gmap');
+    mapDiv.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;background:linear-gradient(135deg,#E8EDF5,#C5D5E8)';
+    mapDiv.innerHTML = `
+      <div style="font-size:48px">🗺️</div>
+      <div style="font-size:14px;font-weight:700;color:#1A2332">Google Maps</div>
+      <div style="font-size:12px;color:#6B7A8D;text-align:center;max-width:260px;line-height:1.6">
+        本番環境ではGoogle Maps APIキーを設定してください<br>
+        <code style="background:#fff;padding:2px 8px;border-radius:4px;font-size:11px">Google Cloud Console</code> で取得できます
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;width:200px">
+        ${SPOTS.map(s=>`
+          <div onclick="selectSpot(${s.id})" style="background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+            <span>${s.icon}</span>
+            <span style="font-size:11px;font-weight:700;color:#1A2332;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</span>
+            <span style="font-size:9px;color:#6B7A8D">${s.real?'✅':'β'}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+});
+</script>
+<script async defer
+  src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap&language=ja">
+</script>
+
 </body>
 </html>
