@@ -514,7 +514,7 @@ footer {
   <div class="nav-links">
     <a class="nav-link" href="#features">機能</a>
     <a class="nav-link" href="#spots">スポット</a>
-    <a class="nav-link" href="#voices">口コミ</a>
+    <a class="nav-link" href="#search-section">探す</a>
     <a class="nav-link" href="#pricing">料金</a>
     <a class="nav-link" href="#faq">FAQ</a>
   </div>
@@ -529,7 +529,7 @@ footer {
   <button class="mob-close" onclick="closeMenu()">✕</button>
   <a class="nav-link" href="#features" onclick="closeMenu()">機能紹介</a>
   <a class="nav-link" href="#spots"    onclick="closeMenu()">スポット検索</a>
-  <a class="nav-link" href="#voices"   onclick="closeMenu()">口コミ</a>
+  <a class="nav-link" href="#search-section" onclick="closeMenu()">探す</a>
   <a class="nav-link" href="#pricing"  onclick="closeMenu()">料金プラン</a>
   <a class="nav-link" href="#faq"      onclick="closeMenu()">よくある質問</a>
   <a class="nav-link" href="#contact"  onclick="closeMenu()">お問い合わせ</a>
@@ -639,8 +639,8 @@ footer {
   <div class="container">
     <div class="sec-head fade">
       <div class="sec-eyebrow">Spot Search</div>
-      <h2 class="sec-title serif">公式データのみ掲載<br>正確な情報だけをお届け</h2>
-      <p class="sec-lead">国土交通省・全日本トラック協会など公式ソースのみ使用。信頼できる情報を。</p>
+      <h2 class="sec-title serif">休憩スポットを探す</h2>
+      <p class="sec-lead">公式データのみ掲載。正確な情報を。</p>
     </div>
     <div class="spots-layout">
       <div class="fade">
@@ -652,6 +652,80 @@ footer {
           📋 出典：国土交通省「道の駅」公式 / 全日本トラック協会 / NAVITIME<br>
           ⚠️ 情報は変更になる場合があります。利用前に各施設へ直接ご確認ください。
         </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ═══ SEARCH SECTION ════════════════════════ -->
+<section id="search-section" style="background:var(--base);padding:5rem 0">
+  <div class="container">
+    <div class="sec-head fade" style="text-align:center">
+      <div class="sec-eyebrow" style="justify-content:center;display:flex">Search</div>
+      <h2 class="sec-title serif">条件を指定して<br>スポットを探す</h2>
+      <p class="sec-lead" style="margin:0 auto">今いる場所から、必要な設備がある休憩場所を見つけましょう。</p>
+    </div>
+
+    <!-- 検索フォーム -->
+    <div class="fade" style="margin-top:2.5rem">
+      <div style="background:var(--white);border:1px solid var(--border-l);border-radius:var(--r);padding:2rem;box-shadow:var(--shadow-md)">
+
+        <!-- キーワード検索 -->
+        <div style="display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap">
+          <div style="flex:1;min-width:220px;position:relative">
+            <svg style="position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;stroke:var(--text-3);fill:none;stroke-width:1.8;stroke-linecap:round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input id="search-keyword" type="text" placeholder="施設名・都道府県で検索..."
+              style="width:100%;border:1px solid var(--border);border-radius:var(--r-sm);padding:.8rem 1rem .8rem 2.8rem;font-size:14px;color:var(--text);font-family:inherit;outline:none;background:var(--base);transition:border-color .2s"
+              oninput="doSearch()" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <button onclick="locateAndSearch()"
+            style="background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);padding:.8rem 1.4rem;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;white-space:nowrap;transition:background .2s"
+            onmouseover="this.style.background='var(--accent-d)'" onmouseout="this.style.background='var(--accent)'">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="11" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+            現在地から探す
+          </button>
+        </div>
+
+        <!-- 設備フィルター -->
+        <div style="margin-bottom:1.2rem">
+          <div style="font-size:11px;color:var(--text-2);letter-spacing:1px;margin-bottom:.7rem;font-weight:500">設備で絞り込む</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="filter-chips">
+            <button class="fchip active" data-filter="shower"   onclick="toggleFilter(this)">🚿 シャワー</button>
+            <button class="fchip"        data-filter="sleep"    onclick="toggleFilter(this)">🛏️ 仮眠室</button>
+            <button class="fchip"        data-filter="parking"  onclick="toggleFilter(this)">🅿️ 大型駐車場</button>
+            <button class="fchip"        data-filter="meal"     onclick="toggleFilter(this)">🍽️ 食堂</button>
+            <button class="fchip"        data-filter="bath"     onclick="toggleFilter(this)">♨️ 温泉・入浴</button>
+            <button class="fchip"        data-filter="laundry"  onclick="toggleFilter(this)">👗 ランドリー</button>
+            <button class="fchip"        data-filter="24h"      onclick="toggleFilter(this)">🕐 24時間</button>
+          </div>
+        </div>
+
+        <!-- 地域フィルター -->
+        <div>
+          <div style="font-size:11px;color:var(--text-2);letter-spacing:1px;margin-bottom:.7rem;font-weight:500">地域で絞り込む</div>
+          <div style="display:flex;flex-wrap:wrap;gap:.5rem" id="region-chips">
+            <button class="fchip active" data-region="all"    onclick="toggleRegion(this)">全国</button>
+            <button class="fchip"        data-region="hokkaido" onclick="toggleRegion(this)">北海道</button>
+            <button class="fchip"        data-region="tohoku"   onclick="toggleRegion(this)">東北</button>
+            <button class="fchip"        data-region="kanto"    onclick="toggleRegion(this)">関東</button>
+            <button class="fchip"        data-region="chubu"    onclick="toggleRegion(this)">中部・東海</button>
+            <button class="fchip"        data-region="kinki"    onclick="toggleRegion(this)">近畿</button>
+            <button class="fchip"        data-region="chugoku"  onclick="toggleRegion(this)">中国・四国</button>
+            <button class="fchip"        data-region="kyushu"   onclick="toggleRegion(this)">九州</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 検索結果 -->
+    <div class="fade" style="margin-top:1.5rem">
+      <div id="search-result-meta" style="font-size:13px;color:var(--text-2);margin-bottom:1rem"></div>
+      <div id="search-results" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem"></div>
+      <div id="search-empty" style="display:none;text-align:center;padding:3rem;color:var(--text-2)">
+        <div style="font-size:36px;margin-bottom:.8rem">🔍</div>
+        <div style="font-size:14px">条件に合うスポットが見つかりませんでした</div>
+        <div style="font-size:12px;margin-top:.4rem">条件を変えてお試しください</div>
       </div>
     </div>
   </div>
@@ -998,6 +1072,117 @@ window.addEventListener('load', () => {
     el.innerHTML='<div style="font-size:36px">🗺️</div><div style="font-size:13px;color:#666">地図を読み込み中...</div>';
   }
 });
+/* ─ 検索・フィルター機能 ─ */
+const SPOT_FILTERS = {
+  // id: { shower, sleep, parking, meal, bath, laundry, h24, region }
+  1:  { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'chubu' },
+  2:  { shower:false, sleep:false, parking:true,  meal:false, bath:true,  laundry:false, h24:false, region:'chubu' },
+  3:  { shower:false, sleep:false, parking:true,  meal:true,  bath:true,  laundry:false, h24:false, region:'chubu' },
+  4:  { shower:false, sleep:false, parking:true,  meal:true,  bath:true,  laundry:false, h24:false, region:'chubu' },
+  5:  { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'chubu' },
+  6:  { shower:false, sleep:false, parking:true,  meal:false, bath:false, laundry:false, h24:false, region:'chubu' },
+  7:  { shower:true,  sleep:true,  parking:true,  meal:true,  bath:false, laundry:true,  h24:false, region:'chubu' },
+  8:  { shower:true,  sleep:true,  parking:true,  meal:false, bath:false, laundry:false, h24:false, region:'chubu' },
+  9:  { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'hokkaido' },
+  10: { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'hokkaido' },
+  11: { shower:true,  sleep:true,  parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'tohoku' },
+  12: { shower:true,  sleep:true,  parking:true,  meal:false, bath:false, laundry:true,  h24:false, region:'tohoku' },
+  13: { shower:false, sleep:false, parking:true,  meal:true,  bath:true,  laundry:true,  h24:true,  region:'kanto' },
+  14: { shower:false, sleep:false, parking:true,  meal:true,  bath:true,  laundry:true,  h24:false, region:'kanto' },
+  15: { shower:false, sleep:true,  parking:true,  meal:true,  bath:true,  laundry:true,  h24:true,  region:'kanto' },
+  16: { shower:true,  sleep:false, parking:true,  meal:false, bath:false, laundry:true,  h24:true,  region:'kanto' },
+  17: { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'chubu' },
+  18: { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:true,  h24:false, region:'chubu' },
+  19: { shower:false, sleep:true,  parking:true,  meal:true,  bath:true,  laundry:false, h24:true,  region:'kinki' },
+  20: { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:false, h24:false, region:'kyushu' },
+  21: { shower:true,  sleep:false, parking:true,  meal:true,  bath:false, laundry:true,  h24:false, region:'kyushu' },
+};
+
+let activeFilters = new Set(['shower']);
+let activeRegion = 'all';
+let searchKeyword = '';
+
+function toggleFilter(el) {
+  const f = el.dataset.filter;
+  if (activeFilters.has(f)) { activeFilters.delete(f); el.classList.remove('active'); }
+  else { activeFilters.add(f); el.classList.add('active'); }
+  doSearch();
+}
+
+function toggleRegion(el) {
+  document.querySelectorAll('#region-chips .fchip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  activeRegion = el.dataset.region;
+  doSearch();
+}
+
+function doSearch() {
+  searchKeyword = document.getElementById('search-keyword').value.toLowerCase();
+  const results = SPOTS.filter(s => {
+    const f = SPOT_FILTERS[s.id] || {};
+    // キーワード
+    if (searchKeyword && !s.name.toLowerCase().includes(searchKeyword) && !s.addr.toLowerCase().includes(searchKeyword)) return false;
+    // 設備フィルター（どれかON→全て満たす）
+    for (const filter of activeFilters) { if (!f[filter]) return false; }
+    // 地域
+    if (activeRegion !== 'all' && f.region !== activeRegion) return false;
+    return true;
+  });
+  renderSearchResults(results);
+}
+
+function renderSearchResults(results) {
+  const container = document.getElementById('search-results');
+  const empty = document.getElementById('search-empty');
+  const meta = document.getElementById('search-result-meta');
+  container.innerHTML = '';
+  if (results.length === 0) {
+    container.style.display = 'none';
+    empty.style.display = 'block';
+    meta.textContent = '';
+    return;
+  }
+  container.style.display = 'grid';
+  empty.style.display = 'none';
+  meta.textContent = results.length + '件のスポットが見つかりました';
+  results.forEach(s => {
+    const a = document.createElement('a');
+    a.className = 'sr-card';
+    a.href = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(s.name + ' ' + s.addr);
+    a.target = '_blank';
+    a.innerHTML = '<div class="sr-cat">' + s.cat + '</div>' +
+      '<div class="sr-name">' + s.name + '</div>' +
+      '<div class="sr-addr">📍 ' + s.addr + '</div>' +
+      '<div class="sr-tel">📞 ' + s.tel + '</div>' +
+      '<div class="sr-tags">' + s.tags.map(t => '<span class="sr-tag">' + t + '</span>').join('') + '</div>';
+    container.appendChild(a);
+  });
+}
+
+function locateAndSearch() {
+  if (!navigator.geolocation) { alert('位置情報が使えません'); return; }
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude, lng = pos.coords.longitude;
+    // 現在地から近い順にソート
+    const sorted = [...SPOTS].sort((a, b) => {
+      const da = Math.hypot(a.lat - lat, a.lng - lng);
+      const db = Math.hypot(b.lat - lat, b.lng - lng);
+      return da - db;
+    });
+    document.getElementById('search-keyword').value = '';
+    searchKeyword = '';
+    activeRegion = 'all';
+    document.querySelectorAll('#region-chips .fchip').forEach(c => c.classList.remove('active'));
+    document.querySelector('#region-chips .fchip[data-region="all"]').classList.add('active');
+    renderSearchResults(sorted);
+    document.getElementById('search-section').scrollIntoView({ behavior: 'smooth' });
+    if (map) { map.panTo({ lat, lng }); map.setZoom(8); }
+  }, () => alert('位置情報を取得できませんでした'));
+}
+
+// 初期表示
+doSearch();
+
 </script>
 <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqR7olaDWEdtvlMRmnDY3Mfv-ohxrDEd4&callback=initMap&language=ja&region=JP"></script>
 </body>
