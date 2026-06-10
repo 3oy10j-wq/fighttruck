@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ファイトラック - 全国のトラック休憩スポットを検索。シャワー・仮眠室・大型駐車場対応施設を簡単検索。">
+<title>ファイトラック | 全国トラック休憩スポット検索</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Serif+JP:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────── */
+:root {
+  --base:     #F7F3EC;
+  --base-2:   #F1ECE4;
+  --white:    #FFFFFF;
+  --accent:   #B08D57;
+  --accent-d: #8C6E3A;
+  --text:     #2B2B2B;
+  --text-2:   #666666;
+  --text-3:   #999999;
+  --border:   #E2D9CC;
+  --border-l: #EDE8DF;
+  --r:        12px;
+  --r-sm:     8px;
+  --shadow:   0 2px 16px rgba(43,43,43,.07);
+  --shadow-md:0 4px 32px rgba(43,43,43,.10);
+  --trans:    all .25s ease;
+}
+
+/* ─── RESET ─────────────────────────────── */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { font-size:16px; scroll-behavior:smooth; }
+body { font-family:'Noto Sans JP',sans-serif; background:var(--base); color:var(--text); line-height:1.8; overflow-x:hidden; -webkit-font-smoothing:antialiased; }
+
+/* ─── SCROLLBAR ─────────────────────────── */
+::-webkit-scrollbar { width:5px; }
+::-webkit-scrollbar-track { background:var(--base-2); }
+::-webkit-scrollbar-thumb { background:var(--accent); border-radius:3px; }
+
+/* ─── UTIL ───────────────────────────────── */
+.container { max-width:1100px; margin:0 auto; padding:0 2rem; }
+.serif { font-family:'Noto Serif JP',serif; }
+.en    { font-family:'Cormorant Garamond',serif; }
+
+/* ─── FADE-IN ────────────────────────────── */
+.fade { opacity:0; transform:translateY(24px); transition:opacity .6s ease,transform .6s ease; }
+.fade.in { opacity:1; transform:none; }
+
+/* ═══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+#nav {
+  position:fixed; top:0; left:0; right:0; z-index:100;
+  background:rgba(247,243,236,.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent;
+  padding:1rem 2rem;
+  display:flex; align-items:center; gap:2rem;
+  transition:var(--trans);
+}
+#nav.solid { border-bottom-color:var(--border); }
+
+.nav-logo { display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
+.nav-logo-icon {
+  width:36px; height:36px;
+  background:var(--accent);
+  border-radius:9px;
+  display:flex; align-items:center; justify-content:center;
+}
+.nav-logo-icon svg { width:20px; height:20px; }
+.nav-logo-ja { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:600; color:var(--text); letter-spacing:1px; }
+.nav-logo-en { font-size:9px; color:var(--text-2); letter-spacing:2.5px; display:block; line-height:1; margin-top:1px; }
+
+.nav-links { display:flex; align-items:center; gap:2rem; margin-left:auto; }
+.nav-link { font-size:13px; color:var(--text-2); text-decoration:none; letter-spacing:.5px; transition:color .2s; }
+.nav-link:hover { color:var(--accent); }
+
+.nav-btn {
+  background:var(--accent); color:#fff;
+  border:none; border-radius:var(--r-sm);
+  padding:.55rem 1.4rem; font-size:13px; font-weight:500;
+  cursor:pointer; font-family:inherit; letter-spacing:.5px;
+  transition:var(--trans);
+}
+.nav-btn:hover { background:var(--accent-d); }
+
+.nav-ham { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:4px; margin-left:auto; }
+.nav-ham span { width:22px; height:1.5px; background:var(--text); display:block; transition:var(--trans); }
+
+/* ─── MOBILE MENU ───────────────────────── */
+#mob-menu {
+  display:none; position:fixed; inset:0; z-index:200;
+  background:var(--base);
+  flex-direction:column; align-items:center; justify-content:center; gap:2.5rem;
+}
+#mob-menu.open { display:flex; }
+.mob-close { position:absolute; top:1.5rem; right:1.5rem; font-size:22px; background:none; border:none; cursor:pointer; color:var(--text-2); }
+#mob-menu .nav-link { font-size:1.1rem; }
+
+/* ═══════════════════════════════════════════
+   HERO
+══════════════════════════════════════════ */
+#hero {
+  min-height:100vh;
+  background:var(--base);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:8rem 2rem 5rem;
+  text-align:center;
+  position:relative;
+}
+/* 薄いテクスチャ背景 */
+#hero::before {
+  content:'';
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 110%, rgba(176,141,87,.1) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 20%, rgba(176,141,87,.06) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+.hero-eyebrow {
+  font-size:11px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--accent); margin-bottom:1.6rem;
+  display:inline-flex; align-items:center; gap:10px;
+  opacity:0; animation:fadeUp .7s .2s forwards;
+}
+.hero-eyebrow::before,.hero-eyebrow::after {
+  content:''; width:28px; height:1px; background:var(--accent);
+}
+
+.hero-title {
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(2.2rem,5.5vw,4rem);
+  font-weight:600; line-height:1.25;
+  color:var(--text); margin-bottom:1rem;
+  opacity:0; animation:fadeUp .7s .4s forwards;
+}
+.hero-title em { font-style:normal; color:var(--accent); }
+
+.hero-service {
+  font-size:clamp(1rem,2.5vw,1.25rem);
+  color:var(--text-2); font-weight:400;
+  margin-bottom:1.2rem;
+  opacity:0; animation:fadeUp .7s .5s forwards;
+}
+
+.hero-desc {
+  font-size:.95rem; color:var(--text-2); font-weight:300;
+  max-width:480px; margin:0 auto 2.8rem;
+  opacity:0; animation:fadeUp .7s .6s forwards;
+}
+
+/* ─── QUICK FEATURES (ファーストビュー内) ── */
+.hero-quick {
+  display:flex; flex-wrap:wrap; justify-content:center; gap:.8rem;
+  margin-bottom:3rem;
+  opacity:0; animation:fadeUp .7s .7s forwards;
+}
+.qfeat {
+  display:flex; align-items:center; gap:.5rem;
+  background:var(--white); border:1px solid var(--border);
+  border-radius:40px; padding:.55rem 1.1rem;
+  font-size:13px; font-weight:500; color:var(--text);
+  white-space:nowrap;
+  transition:var(--trans);
+}
+.qfeat:hover { border-color:var(--accent); color:var(--accent); }
+.qfeat-icon { font-size:16px; }
+
+.hero-btns {
+  display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;
+  opacity:0; animation:fadeUp .7s .8s forwards;
+}
+.btn-primary {
+  background:var(--accent); color:#fff;
+  border:none; border-radius:var(--r-sm);
+  padding:1rem 2.2rem; font-size:14px; font-weight:500;
+  cursor:pointer; font-family:inherit; letter-spacing:.5px;
+  transition:var(--trans);
+}
+.btn-primary:hover { background:var(--accent-d); transform:translateY(-1px); box-shadow:0 6px 20px rgba(176,141,87,.3); }
+.btn-outline {
+  background:transparent; color:var(--text);
+  border:1.5px solid var(--border);
+  border-radius:var(--r-sm); padding:1rem 2.2rem;
+  font-size:14px; font-weight:400;
+  cursor:pointer; font-family:inherit;
+  transition:var(--trans);
+}
+.btn-outline:hover { border-color:var(--accent); color:var(--accent); }
+
+.hero-scroll {
+  position:absolute; bottom:2rem; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  font-size:9px; letter-spacing:3px; color:var(--text-3);
+  animation:bounce 2s ease-in-out infinite;
+}
+.hero-scroll svg { width:16px; height:16px; stroke:var(--text-3); fill:none; stroke-width:1.5; stroke-linecap:round; }
+
+/* ═══════════════════════════════════════════
+   FEATURES SECTION
+══════════════════════════════════════════ */
+#features { background:var(--base-2); padding:6rem 0; }
+.sec-head { margin-bottom:3.5rem; }
+.sec-eyebrow {
+  font-size:10px; letter-spacing:4px; text-transform:uppercase;
+  color:var(--accent); margin-bottom:.8rem;
+}
+.sec-title {
+  font-family:'Noto Serif JP',serif;
+  font-size:clamp(1.6rem,3.5vw,2.4rem);
+  font-weight:600; line-height:1.3; color:var(--text);
+  margin-bottom:.8rem;
+}
+.sec-lead { font-size:.95rem; color:var(--text-2); font-weight:300; max-width:440px; }
+
+.feat-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:1.5rem;
+}
+.feat-card {
+  background:var(--white);
+  border:1px solid var(--border-l);
+  border-radius:var(--r);
+  padding:2rem 1.8rem;
+  transition:var(--trans);
+  box-shadow:var(--shadow);
+}
+.feat-card:hover {
+  border-color:var(--accent);
+  box-shadow:var(--shadow-md);
+  transform:translateY(-3px);
+}
+.feat-ico {
+  width:52px; height:52px;
+  background:rgba(176,141,87,.08);
+  border-radius:var(--r-sm);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:1.2rem;
+  transition:var(--trans);
+}
+.feat-card:hover .feat-ico { background:var(--accent); }
+.feat-ico svg { width:26px; height:26px; stroke:var(--accent); fill:none; stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; transition:stroke .25s; }
+.feat-card:hover .feat-ico svg { stroke:#fff; }
+.feat-label { font-size:10px; letter-spacing:3px; color:var(--accent); text-transform:uppercase; margin-bottom:.5rem; }
+.feat-name { font-family:'Noto Serif JP',serif; font-size:1.15rem; font-weight:600; margin-bottom:.6rem; color:var(--text); }
+.feat-desc { font-size:.875rem; color:var(--text-2); font-weight:300; line-height:1.75; }
+
+/* ═══════════════════════════════════════════
+   MAP / SPOTS SECTION
+══════════════════════════════════════════ */
+#spots { background:var(--base); padding:6rem 0; }
+.spots-layout {
+  display:grid; grid-template-columns:1fr 1.1fr;
+  gap:4rem; align-items:start;
+  margin-top:3rem;
+}
+#site-map {
+  width:100%; height:480px;
+  border-radius:var(--r); overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:var(--shadow-md);
+}
+.spot-list { display:flex; flex-direction:column; gap:.75rem; }
+.spot-card {
+  background:var(--white);
+  border:1px solid var(--border-l);
+  border-radius:var(--r);
+  padding:1.1rem 1.3rem;
+  display:flex; align-items:flex-start; gap:1rem;
+  cursor:pointer; transition:var(--trans);
+  box-shadow:var(--shadow);
+  text-decoration:none; color:inherit;
+}
+.spot-card:hover { border-color:var(--accent); box-shadow:var(--shadow-md); }
+.spot-dot {
+  width:10px; height:10px; border-radius:50%;
+  flex-shrink:0; margin-top:4px;
+}
+.spot-body { flex:1; min-width:0; }
+.spot-name { font-size:13px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.spot-addr { font-size:11px; color:var(--text-2); margin-bottom:5px; }
+.spot-tags { display:flex; gap:4px; flex-wrap:wrap; }
+.stag {
+  font-size:10px; padding:2px 8px; border-radius:4px;
+  font-weight:500; letter-spacing:.3px;
+}
+.stag-ok   { background:#EBF5EB; color:#2E7D32; }
+.stag-info { background:rgba(176,141,87,.1); color:var(--accent); }
+.spot-arrow { color:var(--text-3); flex-shrink:0; align-self:center; }
+.spot-arrow svg { width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; }
+
+.spot-notice {
+  margin-top:1.2rem; font-size:11px; color:var(--text-3);
+  line-height:1.7; padding:.8rem 1rem;
+  background:var(--base-2); border-radius:var(--r-sm);
+  border:1px solid var(--border-l);
+}
+
+/* ═══════════════════════════════════════════
+   VOICES
+══════════════════════════════════════════ */
+#voices { background:var(--base-2); padding:6rem 0; overflow:hidden; }
+.voices-wrap { position:relative; margin-top:3rem; }
+.voices-wrap::before,.voices-wrap::after {
+  content:''; position:absolute; top:0; bottom:0; width:100px; z-index:2; pointer-events:none;
+}
+.voices-wrap::before { left:0; background:linear-gradient(to right,var(--base-2),transparent); }
+.voices-wrap::after  { right:0; background:linear-gradient(to left,var(--base-2),transparent); }
+.voices-track {
+  display:flex; gap:1.2rem;
+  animation:scroll-l 28s linear infinite;
+  width:max-content;
+}
+.voices-track:hover { animation-play-state:paused; }
+.v-card {
+  background:var(--white);
+  border:1px solid var(--border-l);
+  border-radius:var(--r); padding:1.8rem;
+  width:300px; flex-shrink:0;
+  box-shadow:var(--shadow);
+}
+.v-stars { color:var(--accent); font-size:13px; letter-spacing:2px; margin-bottom:.8rem; }
+.v-text  { font-size:.875rem; color:var(--text-2); line-height:1.75; font-weight:300; margin-bottom:1rem; font-style:italic; }
+.v-auth  { font-size:12px; font-weight:700; color:var(--text); }
+.v-role  { font-size:11px; color:var(--text-3); margin-top:1px; }
+
+/* ═══════════════════════════════════════════
+   PRICING
+══════════════════════════════════════════ */
+#pricing { background:var(--base); padding:6rem 0; }
+.pricing-grid {
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:1.5rem; margin-top:3.5rem;
+}
+.p-card {
+  background:var(--white);
+  border:1px solid var(--border-l);
+  border-radius:var(--r); padding:2.5rem 2rem;
+  box-shadow:var(--shadow); transition:var(--trans);
+}
+.p-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
+.p-card.featured { border-color:var(--accent); border-width:2px; }
+.p-badge {
+  display:inline-block; background:var(--accent); color:#fff;
+  font-size:10px; font-weight:700; letter-spacing:1.5px;
+  padding:3px 10px; border-radius:4px; margin-bottom:1.2rem;
+  text-transform:uppercase;
+}
+.p-tier { font-size:11px; letter-spacing:2px; color:var(--text-2); margin-bottom:.6rem; text-transform:uppercase; }
+.p-price {
+  font-family:'Noto Serif JP',serif;
+  font-size:3rem; font-weight:600; color:var(--text); line-height:1; margin-bottom:.2rem;
+}
+.p-price sup { font-size:1.1rem; }
+.p-unit { font-size:12px; color:var(--text-2); margin-bottom:1.8rem; }
+.p-divider { height:1px; background:var(--border-l); margin-bottom:1.8rem; }
+.p-feats { display:flex; flex-direction:column; gap:.7rem; margin-bottom:2rem; }
+.p-feat { display:flex; align-items:center; gap:.6rem; font-size:13px; color:var(--text-2); }
+.p-check { width:18px; height:18px; border-radius:50%; border:1.5px solid var(--accent); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.p-check svg { width:10px; height:10px; stroke:var(--accent); fill:none; stroke-width:2.5; stroke-linecap:round; }
+
+/* ═══════════════════════════════════════════
+   FAQ
+══════════════════════════════════════════ */
+#faq { background:var(--base-2); padding:6rem 0; }
+.faq-list { max-width:680px; margin:3.5rem auto 0; }
+.faq-item {
+  background:var(--white);
+  border:1px solid var(--border-l);
+  border-radius:var(--r); margin-bottom:.75rem;
+  overflow:hidden; box-shadow:var(--shadow);
+  transition:border-color .25s;
+}
+.faq-item:hover { border-color:var(--border); }
+.faq-q {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.2rem 1.5rem; cursor:pointer;
+  font-size:.95rem; font-weight:500; color:var(--text);
+  gap:1rem; user-select:none;
+  transition:color .2s;
+}
+.faq-q.open { color:var(--accent); }
+.faq-icon {
+  width:22px; height:22px; border-radius:50%;
+  border:1.5px solid var(--border); flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; line-height:1; transition:var(--trans);
+  color:var(--text-2);
+}
+.faq-q.open .faq-icon { background:var(--accent); border-color:var(--accent); color:#fff; transform:rotate(45deg); }
+.faq-a {
+  padding:0 1.5rem; font-size:.875rem; color:var(--text-2);
+  line-height:1.8; max-height:0; overflow:hidden;
+  transition:max-height .35s ease, padding .25s;
+}
+.faq-a.open { max-height:300px; padding:.2rem 1.5rem 1.3rem; }
+
+/* ═══════════════════════════════════════════
+   CONTACT
+══════════════════════════════════════════ */
+#contact { background:var(--base); padding:6rem 0; }
+.contact-box {
+  max-width:560px; margin:3.5rem auto 0;
+  background:var(--white); border:1px solid var(--border-l);
+  border-radius:var(--r); padding:3rem;
+  box-shadow:var(--shadow-md);
+}
+.f-group { margin-bottom:1.4rem; }
+.f-label { display:block; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--accent); margin-bottom:.5rem; font-weight:500; }
+.f-input {
+  width:100%; background:var(--base);
+  border:1px solid var(--border); border-radius:var(--r-sm);
+  padding:.85rem 1rem; font-size:14px; color:var(--text);
+  outline:none; font-family:inherit; transition:border-color .2s;
+}
+.f-input:focus { border-color:var(--accent); background:var(--white); }
+.f-input::placeholder { color:var(--text-3); }
+textarea.f-input { resize:vertical; min-height:110px; }
+.f-submit {
+  width:100%; background:var(--accent); color:#fff;
+  border:none; border-radius:var(--r-sm); padding:1.1rem;
+  font-size:14px; font-weight:500; letter-spacing:.5px;
+  cursor:pointer; font-family:inherit; transition:var(--trans);
+}
+.f-submit:hover { background:var(--accent-d); transform:translateY(-1px); box-shadow:0 6px 20px rgba(176,141,87,.3); }
+
+/* ═══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer {
+  background:var(--text); color:rgba(255,255,255,.7);
+  padding:4rem 2rem 2rem;
+}
+.footer-inner {
+  max-width:1100px; margin:0 auto;
+  display:grid; grid-template-columns:1.6fr repeat(3,1fr);
+  gap:3rem; margin-bottom:3rem;
+}
+.foot-brand-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px; color:#fff; margin-bottom:.5rem; margin-top:.8rem;
+}
+.foot-brand-desc { font-size:12px; line-height:1.8; font-weight:300; }
+.foot-title { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:1.1rem; }
+.foot-links { display:flex; flex-direction:column; gap:.55rem; }
+.foot-link { font-size:12px; color:rgba(255,255,255,.6); text-decoration:none; transition:color .2s; }
+.foot-link:hover { color:var(--accent); }
+.foot-bottom {
+  max-width:1100px; margin:0 auto;
+  border-top:1px solid rgba(255,255,255,.1);
+  padding-top:1.5rem;
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:.5rem;
+}
+.foot-copy,.foot-src { font-size:11px; color:rgba(255,255,255,.3); }
+
+/* ═══════════════════════════════════════════
+   KEYFRAMES
+══════════════════════════════════════════ */
+@keyframes fadeUp { to { opacity:1; transform:none; } }
+@keyframes bounce {
+  0%,100% { transform:translateX(-50%) translateY(0); }
+  50%      { transform:translateX(-50%) translateY(-6px); }
+}
+@keyframes scroll-l {
+  from { transform:translateX(0); }
+  to   { transform:translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:900px) {
+  .nav-links,.nav-btn { display:none; }
+  .nav-ham { display:flex; }
+  .spots-layout { grid-template-columns:1fr; }
+  #site-map { height:320px; }
+  .footer-inner { grid-template-columns:1fr 1fr; }
+}
+@media(max-width:600px) {
+  .container { padding:0 1.2rem; }
+  #hero { padding:6rem 1.2rem 4rem; }
+  .hero-title { font-size:2rem; }
+  .hero-btns { flex-direction:column; }
+  .hero-quick { gap:.5rem; }
+  section { padding:4.5rem 0 !important; }
+  .footer-inner { grid-template-columns:1fr; gap:2rem; }
+  .contact-box { padding:2rem 1.2rem; }
+}
+@media(prefers-reduced-motion:reduce) {
+  *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">
+      <svg viewBox="0 0 22 22" fill="none">
+        <rect x="1" y="6" width="20" height="12" rx="3" stroke="white" stroke-width="1.8"/>
+        <rect x="1" y="6" width="9" height="8" rx="2" fill="white" opacity="0.35"/>
+        <circle cx="6" cy="18" r="2.8" fill="white"/>
+        <circle cx="17" cy="18" r="2.8" fill="white"/>
+      </svg>
+    </div>
+    <div>
+      <span class="nav-logo-ja">ファイトラック</span>
+      <span class="nav-logo-en">Truck Rest Finder</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="#features">機能</a>
+    <a class="nav-link" href="#spots">スポット</a>
+    <a class="nav-link" href="#voices">口コミ</a>
+    <a class="nav-link" href="#pricing">料金</a>
+    <a class="nav-link" href="#faq">FAQ</a>
+  </div>
+  <button class="nav-btn" onclick="scroll2('#contact')">無料登録</button>
+  <div class="nav-ham" id="ham" onclick="openMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mob-menu">
+  <button class="mob-close" onclick="closeMenu()">✕</button>
+  <a class="nav-link" href="#features" onclick="closeMenu()">機能紹介</a>
+  <a class="nav-link" href="#spots"    onclick="closeMenu()">スポット検索</a>
+  <a class="nav-link" href="#voices"   onclick="closeMenu()">口コミ</a>
+  <a class="nav-link" href="#pricing"  onclick="closeMenu()">料金プラン</a>
+  <a class="nav-link" href="#faq"      onclick="closeMenu()">よくある質問</a>
+  <a class="nav-link" href="#contact"  onclick="closeMenu()">お問い合わせ</a>
+</div>
+
+<!-- ═══ HERO ═══════════════════════════════ -->
+<section id="hero">
+  <div class="hero-eyebrow">Japan's First Truck Rest Finder</div>
+
+  <h1 class="hero-title serif">
+    走り続けるあなたに、<br><em>上質な休息</em>を。
+  </h1>
+
+  <p class="hero-service" style="font-family:'Noto Serif JP',serif;font-weight:400">
+    全国のトラック休憩スポットを、今すぐ検索
+  </p>
+
+  <p class="hero-desc">
+    シャワー・仮眠室・大型駐車場対応施設を一括検索。<br>
+    公式データのみ掲載。正確な住所・電話・営業時間。
+  </p>
+
+  <!-- ファーストビュー内 サービス一覧 -->
+  <div class="hero-quick">
+    <div class="qfeat"><span class="qfeat-icon">🚿</span>シャワー</div>
+    <div class="qfeat"><span class="qfeat-icon">🛏️</span>仮眠室</div>
+    <div class="qfeat"><span class="qfeat-icon">🅿️</span>大型駐車場</div>
+    <div class="qfeat"><span class="qfeat-icon">🍽️</span>食事</div>
+    <div class="qfeat"><span class="qfeat-icon">👗</span>コインランドリー</div>
+    <div class="qfeat"><span class="qfeat-icon">♨️</span>温泉・入浴</div>
+  </div>
+
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="scroll2('#spots')">スポットを探す</button>
+    <button class="btn-outline"  onclick="scroll2('#pricing')">料金を見る</button>
+  </div>
+
+  <div class="hero-scroll">
+    <svg viewBox="0 0 24 24"><polyline points="6,9 12,15 18,9"/></svg>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ════════════════════════════ -->
+<section id="features">
+  <div class="container">
+    <div class="sec-head fade">
+      <div class="sec-eyebrow">Services</div>
+      <h2 class="sec-title serif">ドライバーに必要な<br>すべての設備を検索</h2>
+      <p class="sec-lead">条件を指定して、今夜の休憩場所を効率的に見つけましょう。</p>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div class="feat-label">Parking</div>
+        <div class="feat-name serif">大型駐車場</div>
+        <div class="feat-desc">大型トラック対応スペースを事前確認。台数・料金・24時間対応かどうかをチェック。</div>
+      </div>
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/><circle cx="12" cy="12" r="10"/></svg>
+        </div>
+        <div class="feat-label">Shower</div>
+        <div class="feat-name serif">シャワー・温泉</div>
+        <div class="feat-desc">コインシャワーから天然温泉まで。料金・営業時間を確認してから向かえます。</div>
+      </div>
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </div>
+        <div class="feat-label">Rest Room</div>
+        <div class="feat-name serif">仮眠室・休憩</div>
+        <div class="feat-desc">仮眠室・休憩室の有無と利用時間を確認。安全に休息できる環境を事前にリサーチ。</div>
+      </div>
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        </div>
+        <div class="feat-label">Dining</div>
+        <div class="feat-name serif">食事・食堂</div>
+        <div class="feat-desc">道の駅の地元料理から24時間食堂まで。しっかり食べて次の目的地へ。</div>
+      </div>
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+        </div>
+        <div class="feat-label">Wi-Fi</div>
+        <div class="feat-name serif">Wi-Fi・充電</div>
+        <div class="feat-desc">無線LAN・電源の有無を確認。運行管理システムへのアクセスにも対応。</div>
+      </div>
+      <div class="feat-card fade">
+        <div class="feat-ico">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+        </div>
+        <div class="feat-label">Hours</div>
+        <div class="feat-name serif">営業時間確認</div>
+        <div class="feat-desc">各施設の営業時間・定休日を事前確認。到着して「閉まっていた」を防ぎます。</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SPOTS ════════════════════════════════ -->
+<section id="spots">
+  <div class="container">
+    <div class="sec-head fade">
+      <div class="sec-eyebrow">Spot Search</div>
+      <h2 class="sec-title serif">公式データのみ掲載<br>正確な情報だけをお届け</h2>
+      <p class="sec-lead">国土交通省・全日本トラック協会など公式ソースのみ使用。信頼できる情報を。</p>
+    </div>
+    <div class="spots-layout">
+      <div class="fade">
+        <div id="site-map"></div>
+      </div>
+      <div class="fade">
+        <div class="spot-list" id="spot-list"></div>
+        <div class="spot-notice">
+          📋 出典：国土交通省「道の駅」公式 / 全日本トラック協会 / NAVITIME<br>
+          ⚠️ 情報は変更になる場合があります。利用前に各施設へ直接ご確認ください。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ VOICES ═══════════════════════════════ -->
+<section id="voices">
+  <div class="container">
+    <div class="sec-head fade" style="text-align:center">
+      <div class="sec-eyebrow" style="justify-content:center;display:flex">Voices</div>
+      <h2 class="sec-title serif">ドライバーから届いた声</h2>
+    </div>
+  </div>
+  <div class="voices-wrap">
+    <div class="voices-track" id="voices-track"></div>
+  </div>
+</section>
+
+<!-- ═══ PRICING ══════════════════════════════ -->
+<section id="pricing">
+  <div class="container">
+    <div class="sec-head fade" style="text-align:center">
+      <div class="sec-eyebrow" style="justify-content:center;display:flex">Pricing</div>
+      <h2 class="sec-title serif">シンプルな料金プラン</h2>
+      <p class="sec-lead" style="margin:0 auto">個人ドライバーから運送会社まで対応しています。</p>
+    </div>
+    <div class="pricing-grid fade">
+
+      <div class="p-card">
+        <div class="p-tier">Free Plan</div>
+        <div class="p-price serif"><sup>¥</sup>0</div>
+        <div class="p-unit">/ 月 ・ 無料プラン</div>
+        <div class="p-divider"></div>
+        <div class="p-feats">
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>スポット検索（月10回まで）</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>基本施設情報の閲覧</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>現在地からの検索</div>
+        </div>
+        <button class="btn-outline" style="width:100%;padding:.9rem" onclick="scroll2('#contact')">無料で始める</button>
+      </div>
+
+      <div class="p-card featured">
+        <div class="p-badge">おすすめ</div>
+        <div class="p-tier">Personal Plan</div>
+        <div class="p-price serif"><sup>¥</sup>500</div>
+        <div class="p-unit">/ 月 ・ 個人ドライバー向け</div>
+        <div class="p-divider"></div>
+        <div class="p-feats">
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>スポット検索（無制限）</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>詳細情報・料金・営業時間</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>お気に入り・チェックイン</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>口コミ投稿・閲覧</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>Google マップ連携</div>
+        </div>
+        <button class="btn-primary" style="width:100%;padding:.9rem" onclick="scroll2('#contact')">今すぐ登録</button>
+      </div>
+
+      <div class="p-card">
+        <div class="p-tier">Corporate Plan</div>
+        <div class="p-price serif"><sup>¥</sup>300</div>
+        <div class="p-unit">/ 人・月 ・ 法人・運送会社向け</div>
+        <div class="p-divider"></div>
+        <div class="p-feats">
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>個人プランの全機能</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>社員全員が利用可能</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>管理者ダッシュボード（準備中）</div>
+          <div class="p-feat"><div class="p-check"><svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg></div>請求書払い（準備中）</div>
+        </div>
+        <button class="btn-outline" style="width:100%;padding:.9rem" onclick="scroll2('#contact')">お問い合わせ</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FAQ ══════════════════════════════════ -->
+<section id="faq">
+  <div class="container">
+    <div class="sec-head fade" style="text-align:center">
+      <div class="sec-eyebrow" style="justify-content:center;display:flex">FAQ</div>
+      <h2 class="sec-title serif">よくあるご質問</h2>
+    </div>
+    <div class="faq-list fade" id="faq-list"></div>
+  </div>
+</section>
+
+<!-- ═══ CONTACT ══════════════════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="sec-head fade" style="text-align:center">
+      <div class="sec-eyebrow" style="justify-content:center;display:flex">Contact</div>
+      <h2 class="sec-title serif">お問い合わせ</h2>
+      <p class="sec-lead" style="margin:0 auto">ご質問・情報提供・誤情報のご指摘など、お気軽にどうぞ。</p>
+    </div>
+    <div class="contact-box fade">
+      <div class="f-group">
+        <label class="f-label">お名前</label>
+        <input type="text" class="f-input" placeholder="山田 太郎">
+      </div>
+      <div class="f-group">
+        <label class="f-label">メールアドレス</label>
+        <input type="email" class="f-input" placeholder="example@email.com">
+      </div>
+      <div class="f-group">
+        <label class="f-label">お問い合わせ種別</label>
+        <select class="f-input" style="cursor:pointer">
+          <option>選択してください</option>
+          <option>新規登録について</option>
+          <option>法人プランについて</option>
+          <option>掲載施設の情報提供</option>
+          <option>情報の誤りのご指摘</option>
+          <option>その他</option>
+        </select>
+      </div>
+      <div class="f-group">
+        <label class="f-label">メッセージ</label>
+        <textarea class="f-input" placeholder="お問い合わせ内容をご記入ください"></textarea>
+      </div>
+      <button class="f-submit" onclick="alert('ありがとうございます。β版のため送信機能は準備中です。')">送信する</button>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ════════════════════════════════ -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="nav-logo-icon" style="background:var(--accent)">
+        <svg viewBox="0 0 22 22" fill="none" width="20" height="20">
+          <rect x="1" y="6" width="20" height="12" rx="3" stroke="white" stroke-width="1.8"/>
+          <rect x="1" y="6" width="9" height="8" rx="2" fill="white" opacity="0.35"/>
+          <circle cx="6" cy="18" r="2.8" fill="white"/>
+          <circle cx="17" cy="18" r="2.8" fill="white"/>
+        </svg>
+      </div>
+      <div class="foot-brand-name en">ファイトラック</div>
+      <div class="foot-brand-desc">トラックドライバーのための<br>休憩スポット検索サービス。<br>日本初・公式データのみ掲載。</div>
+    </div>
+    <div>
+      <div class="foot-title">サービス</div>
+      <div class="foot-links">
+        <a class="foot-link" href="#features">機能紹介</a>
+        <a class="foot-link" href="#spots">スポット検索</a>
+        <a class="foot-link" href="#pricing">料金プラン</a>
+        <a class="foot-link" href="#faq">よくある質問</a>
+      </div>
+    </div>
+    <div>
+      <div class="foot-title">会社情報</div>
+      <div class="foot-links">
+        <a class="foot-link" href="#">運営会社</a>
+        <a class="foot-link" href="#">プライバシーポリシー</a>
+        <a class="foot-link" href="#">利用規約</a>
+        <a class="foot-link" href="#contact">お問い合わせ</a>
+      </div>
+    </div>
+    <div>
+      <div class="foot-title">データ出典</div>
+      <div class="foot-links">
+        <a class="foot-link" href="https://www.michi-no-eki.jp" target="_blank">国土交通省「道の駅」公式</a>
+        <a class="foot-link" href="https://jta.or.jp" target="_blank">全日本トラック協会</a>
+        <a class="foot-link" href="https://www.e-nexco.co.jp" target="_blank">NEXCO各社公式</a>
+      </div>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span class="foot-copy">© 2026 ファイトラック All rights reserved.</span>
+    <span class="foot-src">掲載情報は変更になる場合があります。利用前に各施設へ直接ご確認ください。</span>
+  </div>
+</footer>
+
+<!-- ═══ SCRIPTS ═══════════════════════════════ -->
+<script>
+/* ─ DATA ─ */
+const SPOTS = [
+  { id:1, name:'道の駅 美濃にわか茶屋',        addr:'岐阜県美濃市曽代2007',               tel:'0575-33-5022', lat:35.5398, lng:136.9099, color:'#2E7D32', tags:['✅ 公式データ','🚿シャワー','🅿️大型10台'] },
+  { id:2, name:'道の駅 池田温泉',               addr:'岐阜県揖斐郡池田町片山1953-1',       tel:'0585-45-0037', lat:35.4589, lng:136.5712, color:'#B08D57', tags:['✅ 公式データ','♨️温泉','🅿️大型13台'] },
+  { id:3, name:'道の駅 古今伝授の里 やまと',    addr:'岐阜県郡上市大和町剣164',            tel:'0575-88-2525', lat:35.8162, lng:136.9016, color:'#2E7D32', tags:['✅ 公式データ','♨️温泉隣接','🅿️大型8台'] },
+  { id:4, name:'道の駅 飛騨金山ぬく森の里温泉', addr:'岐阜県下呂市金山町金山911-1',        tel:'0576-32-4855', lat:35.6574, lng:137.2248, color:'#B08D57', tags:['✅ 公式データ','♨️温泉','🅿️大型4台'] },
+  { id:5, name:'道の駅 和良',                   addr:'岐阜県郡上市和良町宮地1155',         tel:'0575-77-2353', lat:35.8380, lng:137.0430, color:'#2E7D32', tags:['✅ 公式データ','🚿シャワー','🅿️大型3台'] },
+  { id:6, name:'名古屋トラックステーション',     addr:'愛知県名古屋市港区藤前3-601',        tel:'052-303-2188', lat:35.0840, lng:136.8326, color:'#1565C0', tags:['✅ 公式データ','🚿コインシャワー','🛏️休憩室','🅿️118台'] },
+  { id:7, name:'亀山トラックステーション',       addr:'三重県亀山市小野町桜ロ586-4',        tel:'0595-82-3935', lat:34.8565, lng:136.4522, color:'#1565C0', tags:['✅ 公式データ','🚿シャワー','🛏️仮眠室'] },
+  { id:8, name:'道の駅 桜の郷 荘川',            addr:'岐阜県高山市荘川町猿丸88',           tel:'05769-2-1030', lat:36.1442, lng:136.8921, color:'#AD1457', tags:['✅ 公式データ','🅿️大型5台','🚻24hトイレ'] },
+];
+
+const VOICES = [
+  { text:'夜中に空いてるシャワー付き駐車場を探すのが本当に大変だった。ファイトラックで一発で見つかって助かりました。', author:'長距離ドライバー', role:'40代・東海エリア担当', stars:5 },
+  { text:'会社で契約してもらいました。大型対応かどうかすぐわかるのがいい。ドライバー全員が使っています。', author:'運送会社 管理担当', role:'50代・岐阜市', stars:5 },
+  { text:'池田温泉が近くにあるって知らなかった。ファイトラックで見つけて、疲れが一気に取れました。', author:'長距離ドライバー', role:'50代・名古屋拠点', stars:5 },
+  { text:'夜間ルートで仮眠室がある場所を事前に調べられるのが最高です。安全運転に直結します。', author:'大型トラックドライバー', role:'40代・関東出身', stars:5 },
+  { text:'正確な住所と電話番号が載っているから信頼できます。間違った情報で困ったことがあったので。', author:'ベテランドライバー', role:'60代・中部エリア', stars:5 },
+  { text:'道の駅の大型駐車場台数がわかるのが助かる。少ない場所に向かって満車だと時間のロス。', author:'配送ドライバー', role:'35代・フリーランス', stars:4 },
+];
+
+const FAQS = [
+  { q:'ファイトラックは無料で使えますか？',
+    a:'基本的な検索機能は無料でご利用いただけます。月10回までのスポット検索と基本情報の閲覧が無料です。詳細情報や無制限検索は月額500円の個人プランをご利用ください。' },
+  { q:'掲載されている情報はどこから取得していますか？',
+    a:'国土交通省「道の駅」公式データ、全日本トラック協会の公式リスト、NEXCO各社の公式サイトなど、信頼性の高い公式ソースのみを使用しています。不確かな情報は一切掲載しません。' },
+  { q:'情報が古い・間違っている場合はどうすればいいですか？',
+    a:'お問い合わせフォームから「情報の誤りのご指摘」をお選びいただき、正しい情報をお知らせください。迅速に確認・修正いたします。信頼性の維持を最優先にしています。' },
+  { q:'法人プランはどのような企業向けですか？',
+    a:'運送会社・物流会社のドライバー管理に活用いただけます。社員全員が利用可能で、月額ドライバー1人あたり300円とリーズナブルです。請求書払いにも対応予定（準備中）です。' },
+  { q:'スマートフォンでも使えますか？',
+    a:'はい、スマートフォン対応しています。現在地からの検索機能もGPSを活用して動作します。iPhoneでもAndroidでもご利用いただけます。' },
+  { q:'今後どんな施設が追加される予定ですか？',
+    a:'現在は道の駅・トラックステーション・SA・PAを中心に掲載しています。今後、コンビニ（大型対応）・ドライバー向け宿泊施設なども順次追加予定です。' },
+];
+
+/* ─ NAV SCROLL ─ */
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('solid', scrollY > 40);
+});
+
+/* ─ SCROLL HELPER ─ */
+function scroll2(sel) {
+  document.querySelector(sel)?.scrollIntoView({ behavior:'smooth' });
+}
+
+/* ─ MOBILE MENU ─ */
+function openMenu()  { document.getElementById('mob-menu').classList.add('open');    document.body.style.overflow='hidden'; }
+function closeMenu() { document.getElementById('mob-menu').classList.remove('open'); document.body.style.overflow=''; }
+
+/* ─ REVEAL ─ */
+new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); } });
+}, { threshold:.12 }).observe.bind(
+  new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); } });
+  }, { threshold:.12 })
+);
+// 簡潔な書き方
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); ro.unobserve(e.target); }});
+}, {threshold:.1});
+document.querySelectorAll('.fade').forEach(el => ro.observe(el));
+
+/* ─ SPOT LIST ─ */
+const spotListEl = document.getElementById('spot-list');
+SPOTS.forEach(s => {
+  const a = document.createElement('a');
+  a.className = 'spot-card';
+  a.href = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(s.name+' '+s.addr)}`;
+  a.target = '_blank';
+  a.innerHTML = `
+    <div class="spot-dot" style="background:${s.color}"></div>
+    <div class="spot-body">
+      <div class="spot-name">${s.name}</div>
+      <div class="spot-addr">${s.addr} ／ ☎ ${s.tel}</div>
+      <div class="spot-tags">${s.tags.map(t=>`<span class="stag stag-info">${t}</span>`).join('')}</div>
+    </div>
+    <div class="spot-arrow"><svg viewBox="0 0 24 24"><polyline points="9,18 15,12 9,6"/></svg></div>`;
+  spotListEl.appendChild(a);
+});
+
+/* ─ VOICES ─ */
+const vtrack = document.getElementById('voices-track');
+[...VOICES,...VOICES].forEach(v => {
+  const c = document.createElement('div');
+  c.className = 'v-card';
+  c.innerHTML = `
+    <div class="v-stars">${'★'.repeat(v.stars)}${'☆'.repeat(5-v.stars)}</div>
+    <div class="v-text">「${v.text}」</div>
+    <div class="v-auth">${v.author}</div>
+    <div class="v-role">${v.role}</div>`;
+  vtrack.appendChild(c);
+});
+
+/* ─ FAQ ─ */
+const faqEl = document.getElementById('faq-list');
+FAQS.forEach(f => {
+  const item = document.createElement('div');
+  item.className = 'faq-item';
+  item.innerHTML = `
+    <div class="faq-q" onclick="toggleFAQ(this)">
+      <span>${f.q}</span>
+      <span class="faq-icon">+</span>
+    </div>
+    <div class="faq-a">${f.a}</div>`;
+  faqEl.appendChild(item);
+});
+function toggleFAQ(el) {
+  const a = el.nextElementSibling;
+  const open = el.classList.contains('open');
+  document.querySelectorAll('.faq-q.open').forEach(q => { q.classList.remove('open'); q.nextElementSibling.classList.remove('open'); });
+  if (!open) { el.classList.add('open'); a.classList.add('open'); }
+}
+
+/* ─ GOOGLE MAPS ─ */
+function initMap() {
+  const map = new google.maps.Map(document.getElementById('site-map'), {
+    center:{lat:35.55,lng:136.95}, zoom:7,
+    styles:[
+      {elementType:'geometry',stylers:[{color:'#F1ECE4'}]},
+      {elementType:'labels.text.stroke',stylers:[{color:'#F1ECE4'}]},
+      {elementType:'labels.text.fill',stylers:[{color:'#2B2B2B'}]},
+      {featureType:'road',elementType:'geometry',stylers:[{color:'#FFFFFF'}]},
+      {featureType:'road.highway',elementType:'geometry',stylers:[{color:'#E8DFD0'}]},
+      {featureType:'water',elementType:'geometry',stylers:[{color:'#C8D8E8'}]},
+      {featureType:'poi',elementType:'labels',stylers:[{visibility:'off'}]},
+      {featureType:'transit',stylers:[{visibility:'off'}]},
+      {featureType:'administrative',elementType:'geometry.stroke',stylers:[{color:'#D6CEC2'}]},
+    ],
+    disableDefaultUI:true, zoomControl:true,
+    zoomControlOptions:{position:google.maps.ControlPosition.RIGHT_TOP}
+  });
+  SPOTS.forEach(s => {
+    const m = new google.maps.Marker({
+      position:{lat:s.lat,lng:s.lng}, map, title:s.name,
+      icon:{path:google.maps.SymbolPath.CIRCLE,scale:10,fillColor:s.color,fillOpacity:1,strokeColor:'#fff',strokeWeight:2.5}
+    });
+    const iw = new google.maps.InfoWindow({
+      content:`<div style="font-family:'Noto Sans JP',sans-serif;padding:4px 2px;min-width:160px">
+        <div style="font-size:12px;font-weight:700;color:#2B2B2B;margin-bottom:3px">${s.name}</div>
+        <div style="font-size:11px;color:#666;margin-bottom:4px">${s.addr}</div>
+        <div style="font-size:11px;color:#B08D57">☎ ${s.tel}</div>
+      </div>`
+    });
+    m.addListener('click', () => iw.open(map, m));
+  });
+}
+
+window.addEventListener('load', () => {
+  if(typeof google==='undefined'){
+    const el=document.getElementById('site-map');
+    el.style.cssText='display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1rem;background:var(--base-2);border-radius:var(--r);border:1px solid var(--border)';
+    el.innerHTML='<div style="font-size:36px">🗺️</div><div style="font-size:13px;color:#666">地図を読み込み中...</div>';
+  }
+});
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCqR7olaDWEdtvlMRmnDY3Mfv-ohxrDEd4&callback=initMap&language=ja&region=JP"></script>
+</body>
+</html>
