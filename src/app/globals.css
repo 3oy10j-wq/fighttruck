@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-base: #f7f3ec;
+  --color-accent: #b08d57;
+  --color-ink: #2b2b2b;
+}
+
+@theme inline {
+  --font-sans: var(--font-noto-sans-jp);
+  --font-serif: var(--font-noto-serif-jp);
+}
+
+body {
+  background-color: var(--color-base);
+  color: var(--color-ink);
+}
