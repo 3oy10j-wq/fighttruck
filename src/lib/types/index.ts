@@ -13,3 +13,36 @@ export interface UserProfile {
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }
+
+export interface SpotFacilities {
+  shower: boolean;
+  sleepingArea: boolean;
+  largeParking: boolean;
+  restaurant: boolean;
+  onsen: boolean;
+  laundry: boolean;
+  open24h: boolean;
+}
+
+export type RegionCode =
+  | 'hokkaido'
+  | 'tohoku'
+  | 'kanto'
+  | 'chubu'
+  | 'kinki'
+  | 'chugoku'
+  | 'shikoku'
+  | 'kyushu';
+
+export interface Spot {
+  id: string;
+  name: string;
+  address: string;
+  lat: number;
+  lng: number;
+  facilities: SpotFacilities;
+  hours: string;
+  region: RegionCode;
+  createdAt: Timestamp | null;
+  updatedAt: Timestamp | null;
+}
