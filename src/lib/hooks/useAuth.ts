@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '@/lib/firebase/config';
+import { db, getFirebaseAuth } from '@/lib/firebase/config';
 import type { UserProfile } from '@/lib/types';
 
 interface UseAuthResult {
@@ -18,7 +18,7 @@ export function useAuth(): UseAuthResult {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (currentUser) => {
       setUser(currentUser);
       if (!currentUser) {
         setProfile(null);

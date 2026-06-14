@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
@@ -14,7 +14,17 @@ const firebaseConfig = {
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-export const auth    = getAuth(app);
+// firebase/auth は初期化時にAPIキーの形式を検証するため、APIキーが
+// 未設定の環境(ビルド時のプリレンダリングなど)で呼び出すと
+// auth/invalid-api-key で例外を投げる。実際に使用されるまで遅延させる。
+let _auth: Auth | undefined;
+export function getFirebaseAuth(): Auth {
+  if (!_auth) {
+    _auth = getAuth(app);
+  }
+  return _auth;
+}
+
 export const db      = getFirestore(app);
 export const storage = getStorage(app);
 export default app;
