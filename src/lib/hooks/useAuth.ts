@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db, getFirebaseAuth } from '@/lib/firebase/config';
+import { getFirebaseAuth, getFirebaseDb } from '@/lib/firebase/config';
 import type { UserProfile } from '@/lib/types';
 
 interface UseAuthResult {
@@ -32,7 +32,7 @@ export function useAuth(): UseAuthResult {
   useEffect(() => {
     if (!user) return;
 
-    const ref = doc(db, 'users', user.uid);
+    const ref = doc(getFirebaseDb(), 'users', user.uid);
     const unsubscribe = onSnapshot(ref, (snapshot) => {
       setProfile(snapshot.exists() ? (snapshot.data() as UserProfile) : null);
       setLoading(false);

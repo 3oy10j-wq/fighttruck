@@ -9,7 +9,7 @@ import {
   User,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db, getFirebaseAuth } from './config';
+import { getFirebaseAuth, getFirebaseDb } from './config';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -40,7 +40,7 @@ export async function resetPassword(email: string) {
 }
 
 async function createUserDocument(user: User, name?: string) {
-  const ref = doc(db, 'users', user.uid);
+  const ref = doc(getFirebaseDb(), 'users', user.uid);
   await setDoc(ref, {
     uid:           user.uid,
     name:          name ?? user.displayName ?? 'ドライバー',

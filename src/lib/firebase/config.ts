@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
-import { getStorage } from 'firebase/storage';
+import { getFirestore, type Firestore } from 'firebase/firestore';
+import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
 	apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,19 +12,37 @@ const firebaseConfig = {
 	appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+// Firebase の各サービスはモジュールロード時ではなく、
+// 実際に使用するタイミングで初期化する。
+// ビルド時(プリレンダリング)に環境変数が未設定でも例外が起きないようにするため。
+let _app: FirebaseApp | undefined;
+function getFirebaseApp(): FirebaseApp {
+  if (!_app) {
+    _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  }
+  return _app;
+}
 
-// firebase/auth は初期化時にAPIキーの形式を検証するため、APIキーが
-// 未設定の環境(ビルド時のプリレンダリングなど)で呼び出すと
-// auth/invalid-api-key で例外を投げる。実際に使用されるまで遅延させる。
 let _auth: Auth | undefined;
 export function getFirebaseAuth(): Auth {
   if (!_auth) {
-    _auth = getAuth(app);
+    _auth = getAuth(getFirebaseApp());
   }
   return _auth;
 }
 
-export const db      = getFirestore(app);
-export const storage = getStorage(app);
-export default app;
+let _db: Firestore | undefined;
+export function getFirebaseDb(): Firestore {
+  if (!_db) {
+    _db = getFirestore(getFirebaseApp());
+  }
+  return _db;
+}
+
+let _storage: FirebaseStorage | undefined;
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!_storage) {
+    _storage = getStorage(getFirebaseApp());
+  }
+  return _storage;
+}
