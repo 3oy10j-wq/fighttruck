@@ -14,9 +14,30 @@ const notoSansJP = Noto_Sans_JP({
   weight: ["400", "500", "700"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://fighttruck.jp';
+
 export const metadata: Metadata = {
-  title: "FightTruck",
-  description: "FightTruck - キッチンカー検索・レビューサービス",
+  title: {
+    default: 'ファイトラック | トラックドライバーの休憩スポット検索',
+    template: '%s | ファイトラック',
+  },
+  description: '全国のトラックドライバー向け休憩スポット検索サービス。シャワー・仮眠室・大型駐車場・温泉など設備で絞り込めます。',
+  metadataBase: new URL(siteUrl),
+  openGraph: {
+    type: 'website',
+    locale: 'ja_JP',
+    url: siteUrl,
+    siteName: 'ファイトラック',
+    title: 'ファイトラック | トラックドライバーの休憩スポット検索',
+    description: '全国のトラックドライバー向け休憩スポット検索サービス。シャワー・仮眠室・大型駐車場・温泉など設備で絞り込めます。',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'ファイトラック' }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'ファイトラック | トラックドライバーの休憩スポット検索',
+    description: '全国のトラックドライバー向け休憩スポット検索サービス。シャワー・仮眠室・大型駐車場・温泉など設備で絞り込めます。',
+    images: ['/og-image.png'],
+  },
 };
 
 export default function RootLayout({
