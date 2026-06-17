@@ -19,9 +19,9 @@ export const spots = [
   },
   {
     name: '海老名サービスエリア(下り線)',
-    address: '神奈川県海老名市河原口2863',
-    lat: 35.4427,
-    lng: 139.3920,
+    address: '〒243-0411 神奈川県海老名市大谷南5-2-1',
+    lat: 35.431556,
+    lng: 139.400139,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -36,9 +36,9 @@ export const spots = [
   },
   {
     name: '足柄サービスエリア(上り線)',
-    address: '神奈川県南足柄市矢倉沢2557',
-    lat: 35.3245,
-    lng: 139.0451,
+    address: '〒412-0023 静岡県御殿場市深沢字前沢1801-1',
+    lat: 35.3013,
+    lng: 138.9235,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -70,9 +70,9 @@ export const spots = [
   },
   {
     name: '道の駅 ましこ',
-    address: '栃木県芳賀郡益子町山本3527',
-    lat: 36.4564,
-    lng: 140.0991,
+    address: '〒321-4225 栃木県芳賀郡益子町長堤2271',
+    lat: 36.4390,
+    lng: 140.0868,
     region: 'kanto',
     facilities: {
       shower: false,
@@ -104,9 +104,9 @@ export const spots = [
   },
   {
     name: '道の駅 みやま',
-    address: '福岡県みやま市瀬高町小川933',
-    lat: 33.1325,
-    lng: 130.4769,
+    address: '〒835-0019 福岡県みやま市瀬高町大江2328',
+    lat: 33.148221,
+    lng: 130.484530,
     region: 'kyushu',
     facilities: {
       shower: false,
@@ -121,9 +121,9 @@ export const spots = [
   },
   {
     name: '桂川パーキングエリア(下り線)',
-    address: '福岡県嘉穂郡桂川町土居2640',
-    lat: 33.5853,
-    lng: 130.6473,
+    address: '京都府京都市南区久世東土川町',
+    lat: 34.9604,
+    lng: 135.7150,
     region: 'kyushu',
     facilities: {
       shower: true,
@@ -138,9 +138,9 @@ export const spots = [
   },
   {
     name: '道の駅 きつれがわ',
-    address: '栃木県さくら市卯の里1-1-1',
-    lat: 36.7156,
-    lng: 140.0166,
+    address: '〒329-1412 栃木県さくら市喜連川4145-10',
+    lat: 36.7292,
+    lng: 140.0448,
     region: 'kanto',
     facilities: {
       shower: false,
@@ -155,9 +155,9 @@ export const spots = [
   },
   {
     name: '双葉サービスエリア(上り線)',
-    address: '福島県双葉郡浪江町大字幾世橋',
-    lat: 37.4858,
-    lng: 140.9893,
+    address: '〒400-0104 山梨県甲斐市龍地2630',
+    lat: 35.6945,
+    lng: 138.5155,
     region: 'tohoku',
     facilities: {
       shower: true,
@@ -189,9 +189,9 @@ export const spots = [
   },
   {
     name: '輪厚パーキングエリア(札幌方面)',
-    address: '北海道北広島市輪厚817',
-    lat: 42.9333,
-    lng: 141.5500,
+    address: '〒061-1264 北海道北広島市輪厚531-6',
+    lat: 42.9889,
+    lng: 141.5083,
     region: 'hokkaido',
     facilities: {
       shower: true,
@@ -206,9 +206,9 @@ export const spots = [
   },
   {
     name: '安達太良サービスエリア(上り線)',
-    address: '福島県本宮市切山字蛇穴沢',
-    lat: 37.5167,
-    lng: 140.4167,
+    address: '〒969-1158 福島県本宮市本宮天ヶ221',
+    lat: 37.5074,
+    lng: 140.4216,
     region: 'tohoku',
     facilities: {
       shower: true,
@@ -291,9 +291,9 @@ export const spots = [
   },
   {
     name: '七塚原サービスエリア(下り線)',
-    address: '広島県庄原市七塚町',
-    lat: 34.8500,
-    lng: 133.0167,
+    address: '〒727-0011 広島県庄原市東本町',
+    lat: 34.8853,
+    lng: 132.9918,
     region: 'chugoku',
     facilities: {
       shower: false,
@@ -325,9 +325,9 @@ export const spots = [
   },
   {
     name: '豊浜サービスエリア(松山方面)',
-    address: '香川県観音寺市豊浜町箕浦2180-1',
-    lat: 34.056951,
-    lng: 133.637171,
+    address: '〒769-1604 香川県観音寺市豊浜町箕浦甲1842-2',
+    lat: 34.0367,
+    lng: 133.6486,
     region: 'shikoku',
     facilities: {
       shower: true,
@@ -342,9 +342,9 @@ export const spots = [
   },
   {
     name: '北熊本サービスエリア(下り線)',
-    address: '熊本県合志市御代志',
-    lat: 32.8833,
-    lng: 130.7333,
+    address: '〒861-5515 熊本県熊本市北区改寄町1563',
+    lat: 32.8927,
+    lng: 130.6664,
     region: 'kyushu',
     facilities: {
       shower: true,
