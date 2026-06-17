@@ -45,7 +45,7 @@ function SpotsPageContent() {
     );
   });
 
-  // 選択カードへの自動スクロール用
+  const mapRef = useRef<google.maps.Map | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
@@ -68,19 +68,24 @@ function SpotsPageContent() {
   const visibleSelectedSpot =
     selectedSpot && filteredSpots.some((s) => s.id === selectedSpot.id) ? selectedSpot : null;
 
-  function handleSelectSpot(spot: Spot | null) {
+  // ピンクリック → 地図は自動移動済み、左カードにスクロール
+  function handleMapSelectSpot(spot: Spot | null) {
     setSelectedSpot(spot);
     if (spot) {
-      // モバイルでピンタップ → マップタブ表示中はリストへ切り替えてスクロール
       setTimeout(() => {
         cardRefs.current[spot.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }, 50);
     }
   }
 
+  // カードクリック → 地図をそのスポットへパン＋ズーム
   function handleCardClick(spot: Spot) {
     setSelectedSpot(spot);
     setMobileTab('map');
+    if (mapRef.current) {
+      mapRef.current.panTo({ lat: spot.lat, lng: spot.lng });
+      mapRef.current.setZoom(13);
+    }
   }
 
   function toggleFacility(key: keyof SpotFacilities) {
@@ -91,21 +96,19 @@ function SpotsPageContent() {
     });
   }
 
-  // サイドパネル
   const SidePanel = (
     <div className="flex h-full flex-col bg-[#1a1f2e]">
 
       {/* ヘッダー */}
-      <div className="border-b border-white/10 px-4 py-4">
+      <div className="shrink-0 border-b border-white/10 px-4 py-4">
         <h1 className="text-base font-bold text-white">🚛 休憩スポット検索</h1>
         <p className="mt-0.5 text-xs text-[#94a3b8]">
-          {loading ? '読み込み中...' : `${filteredSpots.length}件`}
+          {loading ? '読み込み中...' : `${filteredSpots.length}件のスポット`}
         </p>
       </div>
 
       {/* フィルター */}
-      <div className="border-b border-white/10 px-4 py-3 space-y-3">
-        {/* 地域 */}
+      <div className="shrink-0 border-b border-white/10 px-4 py-3 space-y-3">
         <div>
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#64748b]">地域</p>
           <div className="flex flex-wrap gap-1.5">
@@ -133,7 +136,6 @@ function SpotsPageContent() {
           </div>
         </div>
 
-        {/* 設備 */}
         <div>
           <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#64748b]">設備</p>
           <div className="flex flex-wrap gap-1.5">
@@ -153,12 +155,11 @@ function SpotsPageContent() {
         </div>
       </div>
 
-      {/* エラー */}
       {error && (
         <div className="mx-4 mt-3 rounded-lg bg-red-900/30 px-3 py-2 text-xs text-red-400">{error}</div>
       )}
 
-      {/* カードリスト */}
+      {/* スポットカードリスト */}
       <div className="flex-1 overflow-y-auto">
         {filteredSpots.map((spot) => {
           const isSelected = visibleSelectedSpot?.id === spot.id;
@@ -166,37 +167,37 @@ function SpotsPageContent() {
             <div
               key={spot.id}
               ref={(el) => { cardRefs.current[spot.id] = el; }}
-              className={`border-b border-white/10 cursor-pointer transition-colors ${
+              onClick={() => handleCardClick(spot)}
+              className={`cursor-pointer border-b border-white/10 px-4 py-4 transition-colors ${
                 isSelected ? 'bg-[#f97316]/15' : 'hover:bg-white/5'
               }`}
-              onClick={() => handleCardClick(spot)}
             >
-              <div className="px-4 py-4 space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-start justify-between gap-2">
                   <p className={`text-sm font-bold leading-snug ${isSelected ? 'text-[#f97316]' : 'text-white'}`}>
                     {spot.name}
                   </p>
                   {isSelected && (
-                    <span className="shrink-0 rounded-full bg-[#f97316] px-2 py-0.5 text-[10px] font-bold text-white">選択中</span>
+                    <span className="shrink-0 rounded-full bg-[#f97316] px-2 py-0.5 text-[10px] font-bold text-white">
+                      選択中
+                    </span>
                   )}
                 </div>
                 <p className="text-xs text-[#94a3b8]">📍 {spot.address}</p>
                 <p className="text-xs text-[#94a3b8]">🕐 {spot.hours}</p>
-                {/* 設備バッジ */}
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1 pt-0.5">
                   {FACILITY_KEYS.filter((k) => spot.facilities?.[k]).map((k) => (
                     <span key={k} className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-[#cbd5e1]">
                       {FACILITY_ICONS[k]} {FACILITY_LABELS[k]}
                     </span>
                   ))}
                 </div>
-                {/* ナビボタン */}
                 <a
                   href={googleMapsUrl(spot)}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={(e) => e.stopPropagation()}
-                  className="mt-1 flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg bg-[#f97316] text-xs font-bold text-white transition-all hover:bg-[#ea6d0e] hover:shadow-md hover:shadow-orange-500/30"
+                  className="mt-2 flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg bg-[#f97316] text-xs font-bold text-white transition-all hover:bg-[#ea6d0e]"
                 >
                   🗺 Googleマップで経路案内
                 </a>
@@ -206,69 +207,69 @@ function SpotsPageContent() {
         })}
 
         {!loading && filteredSpots.length === 0 && (
-          <div className="flex flex-col items-center gap-2 px-4 py-12 text-center text-[#64748b]">
+          <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
             <span className="text-3xl">🔍</span>
-            <p className="text-sm">条件に一致するスポットが見つかりませんでした</p>
+            <p className="text-sm text-[#64748b]">条件に一致するスポットが見つかりませんでした</p>
           </div>
         )}
       </div>
     </div>
   );
 
-  // 地図エリア
   const MapArea = (
     <div className="h-full w-full">
       <SpotMap
         spots={filteredSpots}
         selectedSpot={visibleSelectedSpot}
-        onSelectSpot={handleSelectSpot}
+        onSelectSpot={handleMapSelectSpot}
+        mapRef={mapRef}
       />
     </div>
   );
 
   return (
     <>
-      {/* ── デスクトップ：サイドパネル＋全画面マップ ── */}
-      <div className="hidden h-[calc(100vh-64px)] md:flex">
-        {/* サイドパネル 320px固定 */}
+      {/* デスクトップ：左320px固定＋右フル地図 */}
+      <div
+        className="hidden md:flex"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
         <div className="w-80 shrink-0 overflow-hidden border-r border-white/10">
           {SidePanel}
         </div>
-        {/* マップ */}
         <div className="flex-1">
           {MapArea}
         </div>
       </div>
 
-      {/* ── モバイル：タブ切り替え ── */}
-      <div className="flex h-[calc(100vh-64px)] flex-col md:hidden">
-        {/* タブバー */}
-        <div className="flex border-b border-white/10 bg-[#1a1f2e]">
+      {/* モバイル：タブ切り替え */}
+      <div
+        className="flex flex-col md:hidden"
+        style={{ height: 'calc(100vh - 64px)' }}
+      >
+        <div className="flex shrink-0 border-b border-white/10 bg-[#1a1f2e]">
           <button
             type="button"
             onClick={() => setMobileTab('list')}
             className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${
-              mobileTab === 'list'
-                ? 'border-b-2 border-[#f97316] text-[#f97316]'
-                : 'text-[#94a3b8]'
+              mobileTab === 'list' ? 'border-b-2 border-[#f97316] text-[#f97316]' : 'text-[#94a3b8]'
             }`}
           >
-            📋 リスト {!loading && <span className="text-xs font-normal">({filteredSpots.length}件)</span>}
+            📋 リスト
+            {!loading && (
+              <span className="text-xs font-normal">({filteredSpots.length}件)</span>
+            )}
           </button>
           <button
             type="button"
             onClick={() => setMobileTab('map')}
             className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${
-              mobileTab === 'map'
-                ? 'border-b-2 border-[#f97316] text-[#f97316]'
-                : 'text-[#94a3b8]'
+              mobileTab === 'map' ? 'border-b-2 border-[#f97316] text-[#f97316]' : 'text-[#94a3b8]'
             }`}
           >
             🗺 地図
           </button>
         </div>
-
-        {/* コンテンツ */}
         <div className="flex-1 overflow-hidden">
           {mobileTab === 'list' ? SidePanel : MapArea}
         </div>
