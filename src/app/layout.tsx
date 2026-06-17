@@ -38,6 +38,9 @@ export const metadata: Metadata = {
     description: '全国のトラックドライバー向け休憩スポット検索サービス。シャワー・仮眠室・大型駐車場・温泉など設備で絞り込めます。',
     images: ['/og-image.png'],
   },
+  verification: {
+    google: 'a3dd5ca59fefbd46',
+  },
 };
 
 export default function RootLayout({
