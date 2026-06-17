@@ -53,9 +53,9 @@ export const spots = [
   },
   {
     name: '谷田部東パーキングエリア(上り線)',
-    address: '茨城県つくば市作谷1146',
-    lat: 36.0186,
-    lng: 140.0758,
+    address: '茨城県つくば市下原263-2',
+    lat: 36.038517,
+    lng: 140.138206,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -172,9 +172,9 @@ export const spots = [
   },
   {
     name: '道の駅 とうや湖',
-    address: '北海道虻田郡洞爺湖町washinosu44',
-    lat: 42.5904,
-    lng: 140.8333,
+    address: '北海道虻田郡洞爺湖町香川9-4',
+    lat: 42.664726,
+    lng: 140.822164,
     region: 'hokkaido',
     facilities: {
       shower: false,
@@ -241,8 +241,8 @@ export const spots = [
   {
     name: '道の駅 富士川楽座',
     address: '静岡県富士市岩淵1488-1',
-    lat: 35.1394,
-    lng: 138.6917,
+    lat: 35.161880,
+    lng: 138.618457,
     region: 'chubu',
     facilities: {
       shower: false,
@@ -275,8 +275,8 @@ export const spots = [
   {
     name: '道の駅 針T.R.S',
     address: '奈良県奈良市針町345',
-    lat: 34.5667,
-    lng: 136.0167,
+    lat: 34.610207,
+    lng: 135.962355,
     region: 'kinki',
     facilities: {
       shower: false,
@@ -308,9 +308,9 @@ export const spots = [
   },
   {
     name: '道の駅 北の関宿安芸高田',
-    address: '広島県安芸高田市高宮町来女木221-1',
-    lat: 34.6500,
-    lng: 132.6833,
+    address: '広島県安芸高田市美土里町横田331-1',
+    lat: 34.721488,
+    lng: 132.680960,
     region: 'chugoku',
     facilities: {
       shower: false,
@@ -325,9 +325,9 @@ export const spots = [
   },
   {
     name: '豊浜サービスエリア(松山方面)',
-    address: '愛媛県四国中央市豊岡町',
-    lat: 33.9500,
-    lng: 133.5500,
+    address: '香川県観音寺市豊浜町箕浦2180-1',
+    lat: 34.056951,
+    lng: 133.637171,
     region: 'shikoku',
     facilities: {
       shower: true,
