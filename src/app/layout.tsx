@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Serif_JP, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
+import Header from "@/components/Header";
 
 const notoSerifJP = Noto_Serif_JP({
   variable: "--font-noto-serif-jp",
@@ -54,6 +55,7 @@ export default function RootLayout({
       className={`${notoSerifJP.variable} ${notoSansJP.variable} h-full`}
     >
       <body className="min-h-full flex flex-col font-sans antialiased">
+        <Header />
         {children}
       </body>
     </html>
