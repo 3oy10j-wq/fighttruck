@@ -1,6 +1,7 @@
 'use client';
 
 import { Suspense, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getSpots } from '@/lib/firebase/spots';
 import { FACILITY_LABELS, REGION_LABELS } from '@/lib/constants';
@@ -158,30 +159,42 @@ function SpotsPageContent() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {filteredSpots.map((spot) => (
-            <button
+            <div
               key={spot.id}
-              type="button"
-              onClick={() => setSelectedSpot(spot)}
-              className={`space-y-2 rounded-2xl border bg-white p-6 text-left shadow-sm transition-colors ${
+              className={`space-y-2 rounded-2xl border bg-white p-6 shadow-sm transition-colors ${
                 selectedSpot?.id === spot.id
                   ? 'border-accent'
                   : 'border-accent/20 hover:border-accent/40'
               }`}
             >
-              <p className="font-serif text-xl font-bold text-ink">{spot.name}</p>
-              <p className="text-sm text-ink/60">{spot.address}</p>
-              <p className="text-sm text-ink/60">営業時間: {spot.hours}</p>
-              <div className="flex flex-wrap gap-2 pt-1">
-                {FACILITY_KEYS.filter((key) => spot.facilities?.[key]).map((key) => (
-                  <span
-                    key={key}
-                    className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
-                  >
-                    {FACILITY_LABELS[key]}
-                  </span>
-                ))}
+              <button
+                type="button"
+                onClick={() => setSelectedSpot(spot)}
+                className="w-full text-left"
+              >
+                <p className="font-serif text-xl font-bold text-ink">{spot.name}</p>
+                <p className="text-sm text-ink/60">{spot.address}</p>
+                <p className="text-sm text-ink/60">営業時間: {spot.hours}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {FACILITY_KEYS.filter((key) => spot.facilities?.[key]).map((key) => (
+                    <span
+                      key={key}
+                      className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium text-accent"
+                    >
+                      {FACILITY_LABELS[key]}
+                    </span>
+                  ))}
+                </div>
+              </button>
+              <div className="pt-2">
+                <Link
+                  href={`/spots/${spot.id}`}
+                  className="text-xs font-medium text-accent hover:underline"
+                >
+                  詳細を見る →
+                </Link>
               </div>
-            </button>
+            </div>
           ))}
         </div>
 
