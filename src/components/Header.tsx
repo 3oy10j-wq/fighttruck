@@ -28,25 +28,28 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-accent/20 bg-white/90 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#0a0f1e]/95 backdrop-blur-sm">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
 
         {/* ロゴ */}
         <Link
           href="/"
-          className="font-serif text-xl font-bold text-ink hover:text-accent transition-colors"
+          className="flex items-center gap-2 text-xl font-bold text-white transition-opacity hover:opacity-80"
         >
-          ファイトラック
+          <span className="text-2xl">🚛</span>
+          <span>ファイトラック</span>
         </Link>
 
         {/* デスクトップナビ */}
-        <nav className="hidden items-center gap-6 md:flex">
+        <nav className="hidden items-center gap-8 md:flex">
           {NAV_LINKS.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
               className={`text-sm font-medium transition-colors ${
-                isActive(href) ? 'text-accent' : 'text-ink/70 hover:text-ink'
+                isActive(href)
+                  ? 'text-[#f97316]'
+                  : 'text-[#e2e8f0]/70 hover:text-white'
               }`}
             >
               {label}
@@ -54,127 +57,107 @@ export default function Header() {
           ))}
 
           {!loading && (
-            <>
-              {user ? (
-                <div className="flex items-center gap-4">
-                  <Link
-                    href="/mypage"
-                    className={`text-sm font-medium transition-colors ${
-                      isActive('/mypage') ? 'text-accent' : 'text-ink/70 hover:text-ink'
-                    }`}
-                  >
-                    マイページ
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={handleSignOut}
-                    className="rounded-full border border-accent/30 px-4 py-1.5 text-sm font-medium text-accent transition-colors hover:bg-accent/10"
-                  >
-                    ログアウト
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-3">
-                  <Link
-                    href="/login"
-                    className="text-sm font-medium text-ink/70 transition-colors hover:text-ink"
-                  >
-                    ログイン
-                  </Link>
-                  <Link
-                    href="/register"
-                    className="rounded-full bg-accent px-4 py-1.5 text-sm font-bold text-white transition-colors hover:bg-accent/90"
-                  >
-                    新規登録
-                  </Link>
-                </div>
-              )}
-            </>
+            user ? (
+              <div className="flex items-center gap-4">
+                <Link
+                  href="/mypage"
+                  className={`text-sm font-medium transition-colors ${
+                    isActive('/mypage') ? 'text-[#f97316]' : 'text-[#e2e8f0]/70 hover:text-white'
+                  }`}
+                >
+                  マイページ
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-[#e2e8f0] transition-all hover:border-white/40 hover:bg-white/10"
+                >
+                  ログアウト
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/login"
+                  className="text-sm font-medium text-[#e2e8f0]/70 transition-colors hover:text-white"
+                >
+                  ログイン
+                </Link>
+                <Link
+                  href="/register"
+                  className="rounded-full bg-[#f97316] px-5 py-2 text-sm font-bold text-white transition-all hover:scale-105 hover:bg-[#ea6d0e] hover:shadow-lg hover:shadow-orange-500/30"
+                >
+                  新規登録
+                </Link>
+              </div>
+            )
           )}
         </nav>
 
-        {/* ハンバーガーボタン（スマホ） */}
+        {/* ハンバーガー（スマホ） */}
         <button
           type="button"
           onClick={() => setMenuOpen((prev) => !prev)}
-          className="flex h-9 w-9 flex-col items-center justify-center gap-1.5 rounded-lg md:hidden"
+          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-lg md:hidden"
           aria-label="メニューを開く"
         >
-          <span
-            className={`block h-0.5 w-5 bg-ink transition-transform duration-200 ${
-              menuOpen ? 'translate-y-2 rotate-45' : ''
-            }`}
-          />
-          <span
-            className={`block h-0.5 w-5 bg-ink transition-opacity duration-200 ${
-              menuOpen ? 'opacity-0' : ''
-            }`}
-          />
-          <span
-            className={`block h-0.5 w-5 bg-ink transition-transform duration-200 ${
-              menuOpen ? '-translate-y-2 -rotate-45' : ''
-            }`}
-          />
+          <span className={`block h-0.5 w-5 bg-white transition-transform duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-5 bg-white transition-opacity duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block h-0.5 w-5 bg-white transition-transform duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
         </button>
       </div>
 
       {/* スマホメニュー */}
       {menuOpen && (
-        <div className="border-t border-accent/20 bg-white px-4 py-4 md:hidden">
-          <nav className="flex flex-col gap-4">
+        <div className="border-t border-white/10 bg-[#111827] px-4 py-6 md:hidden">
+          <nav className="flex flex-col gap-5">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className={`text-sm font-medium ${
-                  isActive(href) ? 'text-accent' : 'text-ink/70'
-                }`}
+                className={`text-base font-medium ${isActive(href) ? 'text-[#f97316]' : 'text-[#e2e8f0]'}`}
               >
                 {label}
               </Link>
             ))}
 
             {!loading && (
-              <>
-                {user ? (
-                  <>
-                    <Link
-                      href="/mypage"
-                      onClick={() => setMenuOpen(false)}
-                      className={`text-sm font-medium ${
-                        isActive('/mypage') ? 'text-accent' : 'text-ink/70'
-                      }`}
-                    >
-                      マイページ
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={handleSignOut}
-                      className="w-full rounded-full border border-accent/30 py-2 text-sm font-medium text-accent"
-                    >
-                      ログアウト
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <Link
-                      href="/login"
-                      onClick={() => setMenuOpen(false)}
-                      className="text-sm font-medium text-ink/70"
-                    >
-                      ログイン
-                    </Link>
-                    <Link
-                      href="/register"
-                      onClick={() => setMenuOpen(false)}
-                      className="rounded-full bg-accent py-2 text-center text-sm font-bold text-white"
-                    >
-                      新規登録
-                    </Link>
-                  </>
-                )}
-              </>
+              user ? (
+                <>
+                  <Link
+                    href="/mypage"
+                    onClick={() => setMenuOpen(false)}
+                    className={`text-base font-medium ${isActive('/mypage') ? 'text-[#f97316]' : 'text-[#e2e8f0]'}`}
+                  >
+                    マイページ
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="w-full rounded-full border border-white/20 py-3 text-sm font-medium text-[#e2e8f0]"
+                  >
+                    ログアウト
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="text-base font-medium text-[#e2e8f0]"
+                  >
+                    ログイン
+                  </Link>
+                  <Link
+                    href="/register"
+                    onClick={() => setMenuOpen(false)}
+                    className="rounded-full bg-[#f97316] py-3 text-center text-sm font-bold text-white"
+                  >
+                    新規登録
+                  </Link>
+                </>
+              )
             )}
           </nav>
         </div>
