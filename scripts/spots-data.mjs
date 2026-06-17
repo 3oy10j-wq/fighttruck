@@ -1,10 +1,10 @@
-// 休憩スポットのサンプルデータ(道の駅・SA/PA)
+// 休憩スポットのサンプルデータ(道の駅・SA/PA) - Google Maps API で検証済み座標
 export const spots = [
   {
     name: '道の駅 川場田園プラザ',
     address: '群馬県利根郡川場村萩室385',
-    lat: 36.6469,
-    lng: 139.1257,
+    lat: 36.6864905,
+    lng: 139.1079444,
     region: 'kanto',
     facilities: {
       shower: false,
@@ -20,8 +20,8 @@ export const spots = [
   {
     name: '海老名サービスエリア(下り線)',
     address: '〒243-0411 神奈川県海老名市大谷南5-2-1',
-    lat: 35.431556,
-    lng: 139.400139,
+    lat: 35.4302425,
+    lng: 139.4008624,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -37,8 +37,8 @@ export const spots = [
   {
     name: '足柄サービスエリア(上り線)',
     address: '〒412-0023 静岡県御殿場市深沢字前沢1801-1',
-    lat: 35.3013,
-    lng: 138.9235,
+    lat: 35.31291849999999,
+    lng: 138.9566778,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -54,8 +54,8 @@ export const spots = [
   {
     name: '谷田部東パーキングエリア(上り線)',
     address: '茨城県つくば市下原263-2',
-    lat: 36.038517,
-    lng: 140.138206,
+    lat: 36.0381601,
+    lng: 140.1384472,
     region: 'kanto',
     facilities: {
       shower: true,
@@ -71,8 +71,8 @@ export const spots = [
   {
     name: '道の駅 ましこ',
     address: '〒321-4225 栃木県芳賀郡益子町長堤2271',
-    lat: 36.4390,
-    lng: 140.0868,
+    lat: 36.4312358,
+    lng: 140.0723528,
     region: 'kanto',
     facilities: {
       shower: false,
@@ -88,8 +88,8 @@ export const spots = [
   {
     name: '三木サービスエリア(上り線)',
     address: '兵庫県三木市福井2596',
-    lat: 34.8197,
-    lng: 135.0203,
+    lat: 34.7948447,
+    lng: 134.977855,
     region: 'kinki',
     facilities: {
       shower: true,
@@ -105,8 +105,8 @@ export const spots = [
   {
     name: '道の駅 みやま',
     address: '〒835-0019 福岡県みやま市瀬高町大江2328',
-    lat: 33.148221,
-    lng: 130.484530,
+    lat: 33.1474122,
+    lng: 130.4838916,
     region: 'kyushu',
     facilities: {
       shower: false,
@@ -122,8 +122,8 @@ export const spots = [
   {
     name: '桂川パーキングエリア(下り線)',
     address: '京都府京都市南区久世東土川町',
-    lat: 34.9604,
-    lng: 135.7150,
+    lat: 34.9458062,
+    lng: 135.720125,
     region: 'kyushu',
     facilities: {
       shower: true,
@@ -139,8 +139,8 @@ export const spots = [
   {
     name: '道の駅 きつれがわ',
     address: '〒329-1412 栃木県さくら市喜連川4145-10',
-    lat: 36.7292,
-    lng: 140.0448,
+    lat: 36.7153737,
+    lng: 140.0329636,
     region: 'kanto',
     facilities: {
       shower: false,
@@ -156,8 +156,8 @@ export const spots = [
   {
     name: '双葉サービスエリア(上り線)',
     address: '〒400-0104 山梨県甲斐市龍地2630',
-    lat: 35.6945,
-    lng: 138.5155,
+    lat: 35.6797546,
+    lng: 138.5101039,
     region: 'tohoku',
     facilities: {
       shower: true,
@@ -173,8 +173,8 @@ export const spots = [
   {
     name: '道の駅 とうや湖',
     address: '北海道虻田郡洞爺湖町香川9-4',
-    lat: 42.664726,
-    lng: 140.822164,
+    lat: 42.6644903,
+    lng: 140.8220166,
     region: 'hokkaido',
     facilities: {
       shower: false,
@@ -190,8 +190,8 @@ export const spots = [
   {
     name: '輪厚パーキングエリア(札幌方面)',
     address: '〒061-1264 北海道北広島市輪厚531-6',
-    lat: 42.9889,
-    lng: 141.5083,
+    lat: 42.9524968,
+    lng: 141.5128428,
     region: 'hokkaido',
     facilities: {
       shower: true,
@@ -207,8 +207,8 @@ export const spots = [
   {
     name: '安達太良サービスエリア(上り線)',
     address: '〒969-1158 福島県本宮市本宮天ヶ221',
-    lat: 37.5074,
-    lng: 140.4216,
+    lat: 37.5152799,
+    lng: 140.3825677,
     region: 'tohoku',
     facilities: {
       shower: true,
@@ -224,8 +224,8 @@ export const spots = [
   {
     name: '駒ヶ岳サービスエリア(上り線)',
     address: '長野県駒ヶ根市赤穂',
-    lat: 35.7333,
-    lng: 137.9333,
+    lat: 35.7322171,
+    lng: 137.9182351,
     region: 'chubu',
     facilities: {
       shower: true,
@@ -241,8 +241,8 @@ export const spots = [
   {
     name: '道の駅 富士川楽座',
     address: '静岡県富士市岩淵1488-1',
-    lat: 35.161880,
-    lng: 138.618457,
+    lat: 35.1618707,
+    lng: 138.618454,
     region: 'chubu',
     facilities: {
       shower: false,
@@ -258,8 +258,8 @@ export const spots = [
   {
     name: '草津パーキングエリア(上り線)',
     address: '滋賀県草津市岡本町',
-    lat: 35.0167,
-    lng: 135.9667,
+    lat: 34.9931553,
+    lng: 135.9777044,
     region: 'kinki',
     facilities: {
       shower: true,
@@ -275,8 +275,8 @@ export const spots = [
   {
     name: '道の駅 針T.R.S',
     address: '奈良県奈良市針町345',
-    lat: 34.610207,
-    lng: 135.962355,
+    lat: 34.6102101,
+    lng: 135.9632352,
     region: 'kinki',
     facilities: {
       shower: false,
@@ -292,8 +292,8 @@ export const spots = [
   {
     name: '七塚原サービスエリア(下り線)',
     address: '〒727-0011 広島県庄原市東本町',
-    lat: 34.8853,
-    lng: 132.9918,
+    lat: 34.8609918,
+    lng: 133.0219188,
     region: 'chugoku',
     facilities: {
       shower: false,
@@ -309,8 +309,8 @@ export const spots = [
   {
     name: '道の駅 北の関宿安芸高田',
     address: '広島県安芸高田市美土里町横田331-1',
-    lat: 34.721488,
-    lng: 132.680960,
+    lat: 34.7212725,
+    lng: 132.6808307,
     region: 'chugoku',
     facilities: {
       shower: false,
@@ -326,8 +326,8 @@ export const spots = [
   {
     name: '豊浜サービスエリア(松山方面)',
     address: '〒769-1604 香川県観音寺市豊浜町箕浦甲1842-2',
-    lat: 34.0367,
-    lng: 133.6486,
+    lat: 34.0533733,
+    lng: 133.6342981,
     region: 'shikoku',
     facilities: {
       shower: true,
@@ -343,8 +343,8 @@ export const spots = [
   {
     name: '北熊本サービスエリア(下り線)',
     address: '〒861-5515 熊本県熊本市北区改寄町1563',
-    lat: 32.8927,
-    lng: 130.6664,
+    lat: 32.8943709,
+    lng: 130.7200802,
     region: 'kyushu',
     facilities: {
       shower: true,
