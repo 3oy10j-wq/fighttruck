@@ -120,7 +120,7 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
                 ))}
             </div>
             <a
-              href={`https://www.google.com/maps/dir/?api=1&destination=${selectedSpot.lat},${selectedSpot.lng}`}
+              href={`https://maps.google.com/?q=${selectedSpot.lat},${selectedSpot.lng}`}
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"

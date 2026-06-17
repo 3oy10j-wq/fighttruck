@@ -21,7 +21,7 @@ const FACILITY_ICONS: Record<keyof SpotFacilities, string> = {
 };
 
 function googleMapsUrl(spot: Spot) {
-  return `https://www.google.com/maps/dir/?api=1&destination=${spot.lat},${spot.lng}`;
+  return `https://maps.google.com/?q=${spot.lat},${spot.lng}`;
 }
 
 function SpotsPageContent() {
