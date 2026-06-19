@@ -43,6 +43,7 @@ export interface Spot {
   facilities: SpotFacilities;
   hours: string;
   region: RegionCode;
+  placeId?: string;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }

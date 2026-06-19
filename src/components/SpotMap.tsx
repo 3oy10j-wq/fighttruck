@@ -44,6 +44,13 @@ const FACILITY_ICONS: Record<keyof typeof FACILITY_LABELS, string> = {
   open24h: '🕐',
 };
 
+function getMapsUrl(spot: Spot): string {
+  if (spot.placeId) {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`;
+  }
+  return `https://maps.google.com/?q=${spot.lat},${spot.lng}`;
+}
+
 interface SpotMapProps {
   spots: Spot[];
   selectedSpot: Spot | null;
@@ -120,7 +127,7 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
                 ))}
             </div>
             <a
-              href={`https://maps.google.com/?q=${selectedSpot.lat},${selectedSpot.lng}`}
+              href={getMapsUrl(selectedSpot)}
               target="_blank"
               rel="noopener noreferrer"
               className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"

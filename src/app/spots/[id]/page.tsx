@@ -103,7 +103,10 @@ export default async function SpotDetailPage({ params }: Props) {
 
         <div className="pt-2">
           <a
-            href={`https://www.google.com/maps?q=${spot.lat},${spot.lng}`}
+            href={spot.placeId
+              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`
+              : `https://maps.google.com/?q=${spot.lat},${spot.lng}`
+            }
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block rounded-full bg-accent px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-accent/90"
