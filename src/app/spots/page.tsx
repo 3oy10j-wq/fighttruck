@@ -1,284 +1,204 @@
 'use client';
 
-import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { getSpots } from '@/lib/firebase/spots';
-import { FACILITY_LABELS, REGION_LABELS } from '@/lib/constants';
-import type { RegionCode, Spot, SpotFacilities } from '@/lib/types';
+import { geocodeAddress, LocationCoords } from '@/lib/location-utils';
 import SpotMap from '@/components/SpotMap';
+import type { Spot } from '@/lib/types';
 
-const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as (keyof SpotFacilities)[];
-const REGION_KEYS = Object.keys(REGION_LABELS) as RegionCode[];
-
-const FACILITY_ICONS: Record<keyof SpotFacilities, string> = {
-  shower:       '🚿',
-  sleepingArea: '🛏',
-  largeParking: '🅿️',
-  restaurant:   '🍜',
-  onsen:        '♨️',
-  laundry:      '👕',
-  open24h:      '🕐',
-};
-
-function googleMapsUrl(spot: Spot) {
-  if (spot.placeId) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`;
-  }
-  return `https://maps.google.com/?q=${spot.lat},${spot.lng}`;
+interface SpotWithDistance extends Spot {
+  distance: number;
 }
 
 function SpotsPageContent() {
-  const searchParams = useSearchParams();
-
-  const [spots, setSpots] = useState<Spot[]>([]);
+  const [allSpots, setAllSpots] = useState<Spot[]>([]);
+  const [michinoekiData, setMichinoekiData] = useState<Spot[]>([]);
+  const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [searchInput, setSearchInput] = useState('');
+  const [searching, setSearching] = useState(false);
   const [selectedSpot, setSelectedSpot] = useState<Spot | null>(null);
-  const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
-
-  const [region, setRegion] = useState<RegionCode | ''>(() => {
-    const p = searchParams.get('region');
-    return p && (REGION_KEYS as string[]).includes(p) ? (p as RegionCode) : '';
-  });
-  const [facilities, setFacilities] = useState<Set<keyof SpotFacilities>>(() => {
-    const p = searchParams.get('facilities');
-    if (!p) return new Set();
-    return new Set(
-      p.split(',').filter((k): k is keyof SpotFacilities => (FACILITY_KEYS as string[]).includes(k))
-    );
-  });
-
+  const [mobileTab, setMobileTab] = useState<'list' | 'map'>('map');
   const mapRef = useRef<google.maps.Map | null>(null);
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // スポットデータを読み込む
   useEffect(() => {
-    getSpots()
-      .then(setSpots)
-      .catch(() => setError('スポット情報の取得に失敗しました。'))
+    Promise.all([
+      getSpots(),
+      fetch('/michinoeki-data.json').then(r => r.json()).then(d => d.data || []),
+    ])
+      .then(([official, michinoeki]) => {
+        setAllSpots(official);
+        setMichinoekiData(michinoeki);
+      })
+      .catch(e => console.error('データ読み込みエラー:', e))
       .finally(() => setLoading(false));
   }, []);
 
-  const filteredSpots = useMemo(() => {
-    return spots.filter((spot) => {
-      if (region && spot.region !== region) return false;
-      for (const key of facilities) {
-        if (!spot.facilities?.[key]) return false;
-      }
-      return true;
-    });
-  }, [spots, region, facilities]);
+  // 検索実行
+  const handleSearch = async () => {
+    if (!searchInput.trim()) return;
 
-  const visibleSelectedSpot =
-    selectedSpot && filteredSpots.some((s) => s.id === selectedSpot.id) ? selectedSpot : null;
+    setSearching(true);
+    const coords = await geocodeAddress(searchInput);
 
-  // ピンクリック → 地図は自動移動済み、左カードにスクロール
-  function handleMapSelectSpot(spot: Spot | null) {
-    setSelectedSpot(spot);
-    if (spot) {
-      setTimeout(() => {
-        cardRefs.current[spot.id]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      }, 50);
-    }
-  }
-
-  // カードクリック → 地図をそのスポットへパン＋ズーム
-  function handleCardClick(spot: Spot) {
-    setSelectedSpot(spot);
-    setMobileTab('map');
-    if (mapRef.current) {
-      mapRef.current.panTo({ lat: spot.lat, lng: spot.lng });
+    if (coords && mapRef.current) {
+      mapRef.current.setCenter(coords);
       mapRef.current.setZoom(13);
     }
-  }
 
-  function toggleFacility(key: keyof SpotFacilities) {
-    setFacilities((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) {
-        next.delete(key);
-      } else {
-        next.add(key);
-      }
-      return next;
-    });
-  }
+    setSearching(false);
+  };
 
-  const SidePanel = (
-    <div className="flex h-full flex-col bg-[#1a1f2e]">
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
 
-      {/* ヘッダー */}
-      <div className="shrink-0 border-b border-white/10 px-4 py-4">
-        <h1 className="text-base font-bold text-white">🚛 休憩スポット検索</h1>
-        <p className="mt-0.5 text-xs text-[#94a3b8]">
-          {loading ? '読み込み中...' : `${filteredSpots.length}件のスポット`}
-        </p>
-      </div>
+  const allData = [...allSpots, ...michinoekiData];
 
-      {/* フィルター */}
-      <div className="shrink-0 border-b border-white/10 px-4 py-3 space-y-3">
-        <div>
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#64748b]">地域</p>
-          <div className="flex flex-wrap gap-1.5">
-            <button
-              type="button"
-              onClick={() => setRegion('')}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                region === '' ? 'bg-[#f97316] text-white' : 'bg-white/10 text-[#cbd5e1] hover:bg-white/20'
-              }`}
-            >
-              すべて
-            </button>
-            {REGION_KEYS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => setRegion((prev) => (prev === key ? '' : key))}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  region === key ? 'bg-[#f97316] text-white' : 'bg-white/10 text-[#cbd5e1] hover:bg-white/20'
-                }`}
-              >
-                {REGION_LABELS[key]}
-              </button>
-            ))}
+  const ListContent = (
+    <div className="space-y-2">
+      {nearbySpots.map((spot) => (
+        <div
+          key={`${spot.type}-${spot.name}`}
+          onClick={() => {
+            setSelectedSpot(spot);
+            setMobileTab('map');
+          }}
+          className="border-l-4 border-orange-500 bg-gray-50 p-3 cursor-pointer hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex items-start justify-between gap-2 mb-1">
+            <p className="font-semibold text-sm text-gray-900">{spot.name}</p>
+            <span className="text-xs font-bold text-orange-600">{spot.distance.toFixed(1)}km</span>
           </div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className="text-xs px-2 py-1 rounded-full bg-gray-200 text-gray-700">
+              {spot.type === 'michinoeki' ? '🏛️ 道の駅' : '⭐ 厳選'}
+            </span>
+          </div>
+          {spot.address && (
+            <p className="text-xs text-gray-600 mb-2">📍 {spot.address}</p>
+          )}
+          <a
+            href={
+              spot.placeId
+                ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`
+                : `https://maps.google.com/?q=${spot.lat},${spot.lng}`
+            }
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="text-xs text-blue-600 hover:underline"
+          >
+            🗺 Google Mapsで開く
+          </a>
         </div>
-
-        <div>
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-widest text-[#64748b]">設備</p>
-          <div className="flex flex-wrap gap-1.5">
-            {FACILITY_KEYS.map((key) => (
-              <button
-                key={key}
-                type="button"
-                onClick={() => toggleFacility(key)}
-                className={`rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors ${
-                  facilities.has(key) ? 'bg-[#3b82f6] text-white' : 'bg-white/10 text-[#cbd5e1] hover:bg-white/20'
-                }`}
-              >
-                {FACILITY_ICONS[key]} {FACILITY_LABELS[key]}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {error && (
-        <div className="mx-4 mt-3 rounded-lg bg-red-900/30 px-3 py-2 text-xs text-red-400">{error}</div>
-      )}
-
-      {/* スポットカードリスト */}
-      <div className="flex-1 overflow-y-auto">
-        {filteredSpots.map((spot) => {
-          const isSelected = visibleSelectedSpot?.id === spot.id;
-          return (
-            <div
-              key={spot.id}
-              ref={(el) => { cardRefs.current[spot.id] = el; }}
-              onClick={() => handleCardClick(spot)}
-              className={`cursor-pointer border-b border-white/10 px-4 py-4 transition-colors ${
-                isSelected ? 'bg-[#f97316]/15' : 'hover:bg-white/5'
-              }`}
-            >
-              <div className="space-y-1.5">
-                <div className="flex items-start justify-between gap-2">
-                  <p className={`text-sm font-bold leading-snug ${isSelected ? 'text-[#f97316]' : 'text-white'}`}>
-                    {spot.name}
-                  </p>
-                  {isSelected && (
-                    <span className="shrink-0 rounded-full bg-[#f97316] px-2 py-0.5 text-[10px] font-bold text-white">
-                      選択中
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs text-[#94a3b8]">📍 {spot.address}</p>
-                <p className="text-xs text-[#94a3b8]">🕐 {spot.hours}</p>
-                <div className="flex flex-wrap gap-1 pt-0.5">
-                  {FACILITY_KEYS.filter((k) => spot.facilities?.[k]).map((k) => (
-                    <span key={k} className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] text-[#cbd5e1]">
-                      {FACILITY_ICONS[k]} {FACILITY_LABELS[k]}
-                    </span>
-                  ))}
-                </div>
-                <a
-                  href={googleMapsUrl(spot)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="mt-2 flex min-h-[40px] items-center justify-center gap-1.5 rounded-lg bg-[#f97316] text-xs font-bold text-white transition-all hover:bg-[#ea6d0e]"
-                >
-                  🗺 Googleマップで経路案内
-                </a>
-              </div>
-            </div>
-          );
-        })}
-
-        {!loading && filteredSpots.length === 0 && (
-          <div className="flex flex-col items-center gap-2 px-4 py-12 text-center">
-            <span className="text-3xl">🔍</span>
-            <p className="text-sm text-[#64748b]">条件に一致するスポットが見つかりませんでした</p>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const MapArea = (
-    <div className="h-full w-full">
-      <SpotMap
-        spots={filteredSpots}
-        selectedSpot={visibleSelectedSpot}
-        onSelectSpot={handleMapSelectSpot}
-        mapRef={mapRef}
-      />
+      ))}
     </div>
   );
 
   return (
     <>
-      {/* デスクトップ：左320px固定＋右フル地図 */}
-      <div
-        className="hidden md:flex"
-        style={{ height: 'calc(100vh - 64px)' }}
-      >
-        <div className="w-80 shrink-0 overflow-hidden border-r border-white/10">
-          {SidePanel}
-        </div>
-        <div className="flex-1">
-          {MapArea}
+      {/* 検索バー */}
+      <div className="sticky top-16 z-10 bg-white border-b border-gray-200 px-4 py-3 shadow-sm">
+        <div className="max-w-3xl mx-auto flex gap-2">
+          <input
+            type="text"
+            placeholder="地名や住所で検索... 例）渋谷、東京駅"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+          />
+          <button
+            onClick={handleSearch}
+            disabled={searching}
+            className="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 disabled:bg-gray-400 transition-colors"
+          >
+            {searching ? '検索中...' : '検索'}
+          </button>
         </div>
       </div>
 
-      {/* モバイル：タブ切り替え */}
-      <div
-        className="flex flex-col md:hidden"
-        style={{ height: 'calc(100vh - 64px)' }}
-      >
-        <div className="flex shrink-0 border-b border-white/10 bg-[#1a1f2e]">
+      {/* デスクトップ: 左リスト + 右地図 */}
+      <div className="hidden md:flex" style={{ height: 'calc(100vh - 240px)' }}>
+        <div className="w-96 overflow-y-auto border-r border-gray-200 bg-white p-4">
+          <div className="mb-2">
+            <p className="text-sm font-semibold text-gray-900">
+              近いスポット ({nearbySpots.length}件)
+            </p>
+          </div>
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">読み込み中...</p>
+            </div>
+          ) : nearbySpots.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500 text-sm">近くにスポットがありません</p>
+            </div>
+          ) : (
+            ListContent
+          )}
+        </div>
+
+        <div className="flex-1">
+          <SpotMap
+            allSpots={allData}
+            selectedSpot={selectedSpot}
+            onSelectSpot={setSelectedSpot}
+            onUpdateNearbySpots={setNearbySpots}
+            mapRef={mapRef}
+          />
+        </div>
+      </div>
+
+      {/* モバイル: タブ切り替え */}
+      <div className="md:hidden flex flex-col" style={{ height: 'calc(100vh - 240px)' }}>
+        <div className="flex border-b border-gray-200 bg-white">
           <button
-            type="button"
             onClick={() => setMobileTab('list')}
-            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${
-              mobileTab === 'list' ? 'border-b-2 border-[#f97316] text-[#f97316]' : 'text-[#94a3b8]'
+            className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+              mobileTab === 'list'
+                ? 'border-b-2 border-orange-500 text-orange-600'
+                : 'text-gray-600'
             }`}
           >
-            📋 リスト
-            {!loading && (
-              <span className="text-xs font-normal">({filteredSpots.length}件)</span>
-            )}
+            📋 リスト ({nearbySpots.length})
           </button>
           <button
-            type="button"
             onClick={() => setMobileTab('map')}
-            className={`flex flex-1 items-center justify-center gap-2 py-3 text-sm font-bold transition-colors ${
-              mobileTab === 'map' ? 'border-b-2 border-[#f97316] text-[#f97316]' : 'text-[#94a3b8]'
+            className={`flex-1 py-3 text-sm font-semibold transition-colors ${
+              mobileTab === 'map'
+                ? 'border-b-2 border-orange-500 text-orange-600'
+                : 'text-gray-600'
             }`}
           >
             🗺 地図
           </button>
         </div>
+
         <div className="flex-1 overflow-hidden">
-          {mobileTab === 'list' ? SidePanel : MapArea}
+          {mobileTab === 'list' ? (
+            <div className="overflow-y-auto p-4">
+              {loading ? (
+                <p className="text-center text-gray-500">読み込み中...</p>
+              ) : nearbySpots.length === 0 ? (
+                <p className="text-center text-gray-500 text-sm">近くにスポットがありません</p>
+              ) : (
+                ListContent
+              )}
+            </div>
+          ) : (
+            <SpotMap
+              allSpots={allData}
+              selectedSpot={selectedSpot}
+              onSelectSpot={setSelectedSpot}
+              onUpdateNearbySpots={setNearbySpots}
+              mapRef={mapRef}
+            />
+          )}
         </div>
       </div>
     </>
@@ -287,7 +207,7 @@ function SpotsPageContent() {
 
 export default function SpotsPage() {
   return (
-    <Suspense>
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">読み込み中...</div>}>
       <SpotsPageContent />
     </Suspense>
   );

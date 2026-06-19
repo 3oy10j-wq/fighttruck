@@ -2,11 +2,11 @@
 
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
-import { FACILITY_LABELS, SPOT_TYPE_COLORS } from '@/lib/constants';
+import { SPOT_TYPE_COLORS } from '@/lib/constants';
+import { calculateDistance, getCurrentLocation, LocationCoords } from '@/lib/location-utils';
 import type { Spot } from '@/lib/types';
 
 const containerStyle = { width: '100%', height: '100%' };
-const defaultCenter = { lat: 36.5, lng: 137.0 };
 
 const mapOptions: google.maps.MapOptions = {
   draggable: true,
@@ -33,15 +33,9 @@ const mapOptions: google.maps.MapOptions = {
   ],
 };
 
-const FACILITY_ICONS: Record<keyof typeof FACILITY_LABELS, string> = {
-  shower: '🚿',
-  sleepingArea: '🛏',
-  largeParking: '🅿️',
-  restaurant: '🍜',
-  onsen: '♨️',
-  laundry: '👕',
-  open24h: '🕐',
-};
+interface SpotWithDistance extends Spot {
+  distance: number;
+}
 
 function getMapsUrl(spot: Spot): string {
   if (spot.placeId) {
@@ -51,38 +45,86 @@ function getMapsUrl(spot: Spot): string {
 }
 
 interface SpotMapProps {
-  spots: Spot[];
+  allSpots: Spot[];
   selectedSpot: Spot | null;
   onSelectSpot: (spot: Spot | null) => void;
+  onUpdateNearbySpots: (spots: SpotWithDistance[]) => void;
   mapRef?: React.MutableRefObject<google.maps.Map | null>;
 }
 
-export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: SpotMapProps) {
+const NEARBY_RADIUS_KM = 20;
+const DISPLAY_LIMIT = 20;
+
+export default function SpotMap({
+  allSpots,
+  selectedSpot,
+  onSelectSpot,
+  onUpdateNearbySpots,
+  mapRef,
+}: SpotMapProps) {
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
   });
 
   const internalRef = useRef<google.maps.Map | null>(null);
-  const [michinoekiData, setMichinoekiData] = useState<Spot[]>([]);
-  const [showMichinoeki, setShowMichinoeki] = useState(true);
+  const [center, setCenter] = useState<LocationCoords | null>(null);
+  const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
+  // 初期現在地取得
   useEffect(() => {
-    fetch('/michinoeki-data.json')
-      .then(r => r.json())
-      .then((d: { data: Spot[] }) => setMichinoekiData(d.data || []))
-      .catch((e: Error) => console.warn('道の駅データ読み込み失敗:', e));
+    setLoading(true);
+    getCurrentLocation()
+      .then((loc) => {
+        setCenter(loc);
+        setLocationError(null);
+      })
+      .catch(() => {
+        setLocationError('位置情報を取得できません。下の検索ボックスで地名を入力してください。');
+        setLoading(false);
+      });
   }, []);
 
-  const visibleSpots = [
-    ...spots,
-    ...(showMichinoeki ? michinoekiData : []),
-  ];
+  // 中心地点が変更されたら、近いスポットを計算
+  useEffect(() => {
+    if (!center) return;
+
+    const nearby = allSpots
+      .map((spot) => ({
+        ...spot,
+        distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
+      }))
+      .filter((spot) => spot.distance <= NEARBY_RADIUS_KM)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, DISPLAY_LIMIT);
+
+    setNearbySpots(nearby);
+    onUpdateNearbySpots(nearby);
+    setLoading(false);
+  }, [center, allSpots, onUpdateNearbySpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     internalRef.current = map;
     if (mapRef) mapRef.current = map;
-  }, [mapRef]);
+
+    if (center) {
+      map.setCenter(center);
+      map.setZoom(13);
+    }
+  }, [center, mapRef]);
+
+  const handleMapCenterChanged = useCallback(() => {
+    if (!internalRef.current) return;
+    const newCenter = internalRef.current.getCenter();
+    if (newCenter) {
+      setCenter({
+        lat: newCenter.lat(),
+        lng: newCenter.lng(),
+      });
+    }
+  }, []);
 
   if (!isLoaded) {
     return (
@@ -95,53 +137,82 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
     );
   }
 
+  if (locationError) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#1a1f2e]">
+        <div className="text-center space-y-4 px-4">
+          <p className="text-2xl">📍</p>
+          <p className="text-sm text-gray-400">{locationError}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!center) {
+    return (
+      <div className="flex h-full w-full items-center justify-center bg-[#1a1f2e] text-[#94a3b8]">
+        <div className="text-center space-y-2">
+          <div className="animate-spin text-3xl">⏳</div>
+          <p className="text-sm">現在地を取得中...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="relative h-full w-full">
-      {/* 凡例 & トグル */}
-      <div className="absolute left-4 top-4 z-10 space-y-2 rounded-lg bg-white/90 p-3 shadow-md">
-        <div className="text-xs font-bold text-gray-900">凡例</div>
-        <label className="flex items-center gap-2 text-xs text-gray-700">
-          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: SPOT_TYPE_COLORS.official_rest }}></div>
-          <span>厳選スポット ({spots.length})</span>
-        </label>
-        <label className="flex items-center gap-2 text-xs text-gray-700">
-          <input
-            type="checkbox"
-            checked={showMichinoeki}
-            onChange={(e) => setShowMichinoeki(e.target.checked)}
-            className="h-3 w-3"
-          />
-          <div className="h-3 w-3 rounded-full" style={{ backgroundColor: SPOT_TYPE_COLORS.michinoeki }}></div>
-          <span>道の駅 ({michinoekiData.length})</span>
-        </label>
+      {/* 凡例 */}
+      <div className="absolute left-4 top-4 z-10 space-y-1 rounded-lg bg-white/90 p-2 shadow-md text-xs">
+        <div className="font-bold text-gray-900">近いスポット</div>
+        <div className="text-gray-600">{nearbySpots.length}件表示</div>
+        <div className="text-[10px] text-gray-500 mt-1">
+          半径{NEARBY_RADIUS_KM}km以内
+        </div>
       </div>
 
       <GoogleMap
         mapContainerStyle={containerStyle}
-        center={defaultCenter}
-        zoom={5}
+        center={center}
+        zoom={13}
         options={mapOptions}
         onLoad={onLoad}
+        onCenterChanged={handleMapCenterChanged}
       >
-        {visibleSpots.map((spot) => (
+        {/* 現在地マーカー */}
+        <MarkerF
+          position={center}
+          icon={{
+            path: google.maps.SymbolPath.CIRCLE,
+            scale: 8,
+            fillColor: '#3b82f6',
+            fillOpacity: 0.8,
+            strokeColor: '#ffffff',
+            strokeWeight: 2,
+          }}
+          title="現在地"
+        />
+
+        {/* スポットピン */}
+        {nearbySpots.map((spot) => (
           <MarkerF
             key={`${spot.type || 'official_rest'}-${spot.name}`}
             position={{ lat: spot.lat, lng: spot.lng }}
             onClick={() => onSelectSpot(spot)}
             icon={{
               path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-              fillColor: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type
+              fillColor: selectedSpot?.name === spot.name
                 ? '#fbbf24'
                 : SPOT_TYPE_COLORS[spot.type || 'official_rest'],
               fillOpacity: 1,
               strokeColor: '#ffffff',
               strokeWeight: 1.5,
-              scale: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type ? 2 : 1.6,
+              scale: selectedSpot?.name === spot.name ? 2 : 1.6,
               anchor: new window.google.maps.Point(12, 22),
             }}
           />
         ))}
 
+        {/* InfoWindow */}
         {selectedSpot && (
           <InfoWindowF
             position={{ lat: selectedSpot.lat, lng: selectedSpot.lng }}
@@ -153,20 +224,9 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
               {'address' in selectedSpot && (
                 <p className="text-xs text-gray-500 mb-1">📍 {selectedSpot.address}</p>
               )}
-              {'hours' in selectedSpot && (
-                <p className="text-xs text-gray-500 mb-2">🕐 {selectedSpot.hours}</p>
-              )}
-              {selectedSpot.type === 'official_rest' && 'facilities' in selectedSpot && (
-                <div className="flex flex-wrap gap-1 mb-3">
-                  {(Object.keys(FACILITY_LABELS) as (keyof typeof FACILITY_LABELS)[])
-                    .filter((k) => selectedSpot.facilities?.[k])
-                    .map((k) => (
-                      <span key={k} className="rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-medium text-orange-700">
-                        {FACILITY_ICONS[k]} {FACILITY_LABELS[k]}
-                      </span>
-                    ))}
-                </div>
-              )}
+              <p className="text-xs text-gray-500 mb-2">
+                📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance.toFixed(1) || '?'}km
+              </p>
               <a
                 href={getMapsUrl(selectedSpot)}
                 target="_blank"
