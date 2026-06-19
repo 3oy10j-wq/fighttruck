@@ -2,7 +2,6 @@
 
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
-import { MarkerClusterer } from '@react-google-maps/marker-clusterer';
 import { FACILITY_LABELS, SPOT_TYPE_COLORS } from '@/lib/constants';
 import type { Spot } from '@/lib/types';
 
@@ -65,7 +64,6 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
   });
 
   const internalRef = useRef<google.maps.Map | null>(null);
-  const clustererRef = useRef<any>(null);
   const [michinoekiData, setMichinoekiData] = useState<any[]>([]);
   const [showMichinoeki, setShowMichinoeki] = useState(true);
   const [visibleSpots, setVisibleSpots] = useState(spots);
@@ -129,31 +127,24 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
         options={mapOptions}
         onLoad={onLoad}
       >
-        <MarkerClusterer onLoad={clustererRef.current}>
-          {(clusterer) => (
-            <>
-              {visibleSpots.map((spot) => (
-                <MarkerF
-                  key={`${spot.type || 'official_rest'}-${spot.name}`}
-                  position={{ lat: spot.lat, lng: spot.lng }}
-                  onClick={() => onSelectSpot(spot)}
-                  icon={{
-                    path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-                    fillColor: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type
-                      ? '#fbbf24'
-                      : SPOT_TYPE_COLORS[spot.type || 'official_rest'],
-                    fillOpacity: 1,
-                    strokeColor: '#ffffff',
-                    strokeWeight: 1.5,
-                    scale: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type ? 2 : 1.6,
-                    anchor: new window.google.maps.Point(12, 22),
-                  }}
-                  clusterer={clusterer}
-                />
-              ))}
-            </>
-          )}
-        </MarkerClusterer>
+        {visibleSpots.map((spot) => (
+          <MarkerF
+            key={`${spot.type || 'official_rest'}-${spot.name}`}
+            position={{ lat: spot.lat, lng: spot.lng }}
+            onClick={() => onSelectSpot(spot)}
+            icon={{
+              path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+              fillColor: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type
+                ? '#fbbf24'
+                : SPOT_TYPE_COLORS[spot.type || 'official_rest'],
+              fillOpacity: 1,
+              strokeColor: '#ffffff',
+              strokeWeight: 1.5,
+              scale: selectedSpot?.name === spot.name && selectedSpot?.type === spot.type ? 2 : 1.6,
+              anchor: new window.google.maps.Point(12, 22),
+            }}
+          />
+        ))}
 
         {selectedSpot && (
           <InfoWindowF
