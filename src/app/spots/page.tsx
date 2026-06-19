@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { getSpots } from '@/lib/firebase/spots';
-import { geocodeAddress, LocationCoords } from '@/lib/location-utils';
+import { geocodeAddress } from '@/lib/location-utils';
 import SpotMap from '@/components/SpotMap';
 import type { Spot } from '@/lib/types';
 

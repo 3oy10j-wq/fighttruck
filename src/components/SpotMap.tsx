@@ -70,21 +70,26 @@ export default function SpotMap({
   const internalRef = useRef<google.maps.Map | null>(null);
   const [center, setCenter] = useState<LocationCoords | null>(null);
   const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
-  const [loading, setLoading] = useState(true);
   const [locationError, setLocationError] = useState<string | null>(null);
 
   // 初期現在地取得
   useEffect(() => {
-    setLoading(true);
+    let isMounted = true;
+
     getCurrentLocation()
       .then((loc) => {
-        setCenter(loc);
-        setLocationError(null);
+        if (isMounted) {
+          setCenter(loc);
+          setLocationError(null);
+        }
       })
       .catch(() => {
-        setLocationError('位置情報を取得できません。下の検索ボックスで地名を入力してください。');
-        setLoading(false);
+        if (isMounted) {
+          setLocationError('位置情報を取得できません。下の検索ボックスで地名を入力してください。');
+        }
       });
+
+    return () => { isMounted = false; };
   }, []);
 
   // 中心地点が変更されたら、近いスポットを計算
@@ -102,7 +107,6 @@ export default function SpotMap({
 
     setNearbySpots(nearby);
     onUpdateNearbySpots(nearby);
-    setLoading(false);
   }, [center, allSpots, onUpdateNearbySpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
