@@ -43,6 +43,7 @@ export interface Spot {
   facilities: SpotFacilities;
   hours: string;
   region: RegionCode;
+  type?: 'official_rest' | 'michinoeki';
   placeId?: string;
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;

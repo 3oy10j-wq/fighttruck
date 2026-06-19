@@ -20,3 +20,13 @@ export const REGION_LABELS: Record<RegionCode, string> = {
   shikoku: '四国',
   kyushu: '九州',
 };
+
+export const SPOT_TYPE_LABELS: Record<'official_rest' | 'michinoeki', string> = {
+  official_rest: '厳選スポット',
+  michinoeki: '道の駅',
+};
+
+export const SPOT_TYPE_COLORS: Record<'official_rest' | 'michinoeki', string> = {
+  official_rest: '#f97316',
+  michinoeki: '#3b82f6',
+};

@@ -16,6 +16,7 @@ export const spots = [
       open24h: false,
     },
     hours: '9:00〜18:00(施設により異なる)',
+    type: 'official_rest',
   },
   {
     name: '海老名サービスエリア(下り線)',
