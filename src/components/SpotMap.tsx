@@ -96,17 +96,21 @@ export default function SpotMap({
   useEffect(() => {
     if (!center) return;
 
-    const nearby = allSpots
-      .map((spot) => ({
-        ...spot,
-        distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
-      }))
-      .filter((spot) => spot.distance <= NEARBY_RADIUS_KM)
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, DISPLAY_LIMIT);
+    const updateNearby = () => {
+      const nearby = allSpots
+        .map((spot) => ({
+          ...spot,
+          distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
+        }))
+        .filter((spot) => spot.distance <= NEARBY_RADIUS_KM)
+        .sort((a, b) => a.distance - b.distance)
+        .slice(0, DISPLAY_LIMIT);
 
-    setNearbySpots(nearby);
-    onUpdateNearbySpots(nearby);
+      setNearbySpots(nearby);
+      onUpdateNearbySpots(nearby);
+    };
+
+    updateNearby();
   }, [center, allSpots, onUpdateNearbySpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
