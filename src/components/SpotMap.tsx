@@ -64,24 +64,20 @@ export default function SpotMap({ spots, selectedSpot, onSelectSpot, mapRef }: S
   });
 
   const internalRef = useRef<google.maps.Map | null>(null);
-  const [michinoekiData, setMichinoekiData] = useState<any[]>([]);
+  const [michinoekiData, setMichinoekiData] = useState<Spot[]>([]);
   const [showMichinoeki, setShowMichinoeki] = useState(true);
-  const [visibleSpots, setVisibleSpots] = useState(spots);
 
   useEffect(() => {
     fetch('/michinoeki-data.json')
       .then(r => r.json())
-      .then(d => setMichinoekiData(d.data || []))
-      .catch(e => console.warn('道の駅データ読み込み失敗:', e));
+      .then((d: { data: Spot[] }) => setMichinoekiData(d.data || []))
+      .catch((e: Error) => console.warn('道の駅データ読み込み失敗:', e));
   }, []);
 
-  useEffect(() => {
-    const merged = [
-      ...spots,
-      ...(showMichinoeki ? michinoekiData : []),
-    ];
-    setVisibleSpots(merged);
-  }, [spots, michinoekiData, showMichinoeki]);
+  const visibleSpots = [
+    ...spots,
+    ...(showMichinoeki ? michinoekiData : []),
+  ];
 
   const onLoad = useCallback((map: google.maps.Map) => {
     internalRef.current = map;
