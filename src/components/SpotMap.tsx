@@ -98,6 +98,19 @@ export default function SpotMap({
 
     const updateNearby = () => {
       const nearby = allSpots
+        .filter((spot) => {
+          // 有効な座標をチェック
+          return (
+            typeof spot.lat === 'number' &&
+            typeof spot.lng === 'number' &&
+            !isNaN(spot.lat) &&
+            !isNaN(spot.lng) &&
+            spot.lat >= -90 &&
+            spot.lat <= 90 &&
+            spot.lng >= -180 &&
+            spot.lng <= 180
+          );
+        })
         .map((spot) => ({
           ...spot,
           distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
@@ -233,7 +246,7 @@ export default function SpotMap({
                 <p className="text-xs text-gray-500 mb-1">📍 {selectedSpot.address}</p>
               )}
               <p className="text-xs text-gray-500 mb-2">
-                📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance.toFixed(1) || '?'}km
+                📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance?.toFixed(1) || '?'}km
               </p>
               <a
                 href={getMapsUrl(selectedSpot)}

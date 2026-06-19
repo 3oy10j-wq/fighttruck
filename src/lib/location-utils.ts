@@ -1,3 +1,5 @@
+'use client';
+
 // 位置情報ユーティリティ
 
 export interface LocationCoords {
@@ -7,6 +9,22 @@ export interface LocationCoords {
 
 // ハバーサイン公式で2点間の距離（km）を計算
 export function calculateDistance(from: LocationCoords, to: LocationCoords): number {
+  // 入力値の有効性チェック
+  if (
+    !from ||
+    !to ||
+    typeof from.lat !== 'number' ||
+    typeof from.lng !== 'number' ||
+    typeof to.lat !== 'number' ||
+    typeof to.lng !== 'number' ||
+    isNaN(from.lat) ||
+    isNaN(from.lng) ||
+    isNaN(to.lat) ||
+    isNaN(to.lng)
+  ) {
+    return 0;
+  }
+
   const R = 6371; // 地球の半径（km）
   const dLat = ((to.lat - from.lat) * Math.PI) / 180;
   const dLng = ((to.lng - from.lng) * Math.PI) / 180;
