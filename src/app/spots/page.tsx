@@ -126,7 +126,7 @@ function SpotsPageContent() {
       </div>
 
       {/* デスクトップ: 左リスト + 右地図 */}
-      <div className="hidden md:flex" style={{ height: 'calc(100vh - 240px)' }}>
+      <div className="hidden md:flex" style={{ height: 'calc(100vh - 16rem)' }}>
         <div className="w-96 overflow-y-auto border-r border-gray-200 bg-white p-4">
           <div className="mb-2">
             <p className="text-sm font-semibold text-gray-900">
@@ -158,7 +158,7 @@ function SpotsPageContent() {
       </div>
 
       {/* モバイル: タブ切り替え */}
-      <div className="md:hidden flex flex-col" style={{ height: 'calc(100vh - 240px)' }}>
+      <div className="md:hidden flex flex-col" style={{ height: 'calc(100vh - 16rem)' }}>
         <div className="flex border-b border-gray-200 bg-white">
           <button
             onClick={() => setMobileTab('list')}
