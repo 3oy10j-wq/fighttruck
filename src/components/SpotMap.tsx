@@ -191,9 +191,9 @@ export default function SpotMap({
   }
 
   return (
-    <div className="relative h-full w-full z-0">
+    <div className="relative h-full w-full z-0 pointer-events-none">
       {/* 凡例 */}
-      <div className="absolute left-4 top-4 z-10 space-y-1 rounded-lg bg-white/90 p-2 shadow-md text-xs">
+      <div className="absolute left-4 top-4 z-10 space-y-1 rounded-lg bg-white/90 p-2 shadow-md text-xs pointer-events-auto">
         <div className="font-bold text-gray-900">近いスポット</div>
         <div className="text-gray-600">{nearbySpots.length}件表示</div>
         <div className="text-[10px] text-gray-500 mt-1">
@@ -201,14 +201,15 @@ export default function SpotMap({
         </div>
       </div>
 
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={center}
-        zoom={13}
-        options={mapOptions}
-        onLoad={onLoad}
-        onIdle={handleMapIdle}
-      >
+      <div className="pointer-events-auto h-full w-full">
+        <GoogleMap
+          mapContainerStyle={containerStyle}
+          center={center}
+          zoom={13}
+          options={mapOptions}
+          onLoad={onLoad}
+          onIdle={handleMapIdle}
+        >
         {/* 現在地マーカー */}
         <MarkerF
           position={center}
@@ -282,6 +283,7 @@ export default function SpotMap({
           );
         })()}
       </GoogleMap>
+      </div>
     </div>
   );
 }
