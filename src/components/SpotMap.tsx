@@ -214,51 +214,63 @@ export default function SpotMap({
         />
 
         {/* スポットピン */}
-        {nearbySpots.map((spot) => (
-          <MarkerF
-            key={`${spot.type || 'official_rest'}-${spot.name}`}
-            position={{ lat: spot.lat, lng: spot.lng }}
-            onClick={() => onSelectSpot(spot)}
-            icon={{
-              path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
-              fillColor: selectedSpot?.name === spot.name
-                ? '#fbbf24'
-                : SPOT_TYPE_COLORS[spot.type || 'official_rest'],
-              fillOpacity: 1,
-              strokeColor: '#ffffff',
-              strokeWeight: 1.5,
-              scale: selectedSpot?.name === spot.name ? 2 : 1.6,
-              anchor: new window.google.maps.Point(12, 22),
-            }}
-          />
-        ))}
+        {nearbySpots.map((spot) => {
+          const baseIcon = {
+            path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+            fillColor: selectedSpot?.name === spot.name
+              ? '#fbbf24'
+              : SPOT_TYPE_COLORS[spot.type || 'official_rest'],
+            fillOpacity: 1,
+            strokeColor: '#ffffff',
+            strokeWeight: 1.5,
+            scale: selectedSpot?.name === spot.name ? 2 : 1.6,
+            ...(typeof google !== 'undefined' && google.maps
+              ? { anchor: new google.maps.Point(12, 22) }
+              : {}),
+          };
+
+          return (
+            <MarkerF
+              key={`${spot.type || 'official_rest'}-${spot.name}`}
+              position={{ lat: spot.lat, lng: spot.lng }}
+              onClick={() => onSelectSpot(spot)}
+              icon={baseIcon as unknown as google.maps.Icon}
+            />
+          );
+        })}
 
         {/* InfoWindow */}
-        {selectedSpot && (
-          <InfoWindowF
-            position={{ lat: selectedSpot.lat, lng: selectedSpot.lng }}
-            onCloseClick={() => onSelectSpot(null)}
-            options={{ pixelOffset: new window.google.maps.Size(0, -36) }}
-          >
-            <div className="max-w-[240px] p-2">
-              <p className="font-bold text-sm text-gray-900 mb-1">{selectedSpot.name}</p>
-              {'address' in selectedSpot && (
-                <p className="text-xs text-gray-500 mb-1">📍 {selectedSpot.address}</p>
-              )}
-              <p className="text-xs text-gray-500 mb-2">
-                📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance?.toFixed(1) || '?'}km
-              </p>
-              <a
-                href={getMapsUrl(selectedSpot)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"
-              >
-                🗺 Google Mapsで開く
-              </a>
-            </div>
-          </InfoWindowF>
-        )}
+        {selectedSpot && (() => {
+          const infoWindowOptions: google.maps.InfoWindowOptions = {};
+          if (typeof google !== 'undefined' && google.maps) {
+            infoWindowOptions.pixelOffset = new google.maps.Size(0, -36);
+          }
+          return (
+            <InfoWindowF
+              position={{ lat: selectedSpot.lat, lng: selectedSpot.lng }}
+              onCloseClick={() => onSelectSpot(null)}
+              options={infoWindowOptions}
+            >
+              <div className="max-w-[240px] p-2">
+                <p className="font-bold text-sm text-gray-900 mb-1">{selectedSpot.name}</p>
+                {'address' in selectedSpot && (
+                  <p className="text-xs text-gray-500 mb-1">📍 {selectedSpot.address}</p>
+                )}
+                <p className="text-xs text-gray-500 mb-2">
+                  📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance?.toFixed(1) || '?'}km
+                </p>
+                <a
+                  href={getMapsUrl(selectedSpot)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"
+                >
+                  🗺 Google Mapsで開く
+                </a>
+              </div>
+            </InfoWindowF>
+          );
+        })()}
       </GoogleMap>
     </div>
   );
