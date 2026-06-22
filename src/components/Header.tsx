@@ -28,7 +28,7 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-white/10 bg-[#0a0f1e]/95 backdrop-blur-sm">
+    <header className="sticky top-0 z-[100] border-b border-white/10 bg-[#0a0f1e]/95 backdrop-blur-sm pointer-events-auto">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
 
         {/* ロゴ */}
