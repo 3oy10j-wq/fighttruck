@@ -191,7 +191,7 @@ export default function SpotMap({
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full z-0">
       {/* 凡例 */}
       <div className="absolute left-4 top-4 z-10 space-y-1 rounded-lg bg-white/90 p-2 shadow-md text-xs">
         <div className="font-bold text-gray-900">近いスポット</div>
