@@ -6,7 +6,12 @@ import { SPOT_TYPE_COLORS } from '@/lib/constants';
 import { calculateDistance, getCurrentLocation, LocationCoords } from '@/lib/location-utils';
 import type { Spot } from '@/lib/types';
 
-const containerStyle = { width: '100%', height: '100%' };
+const containerStyle = {
+  width: '100%',
+  height: '100%',
+  position: 'relative' as const,
+  overflow: 'hidden' as const,
+};
 
 const mapOptions: google.maps.MapOptions = {
   draggable: true,
