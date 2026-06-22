@@ -75,7 +75,6 @@ export default function SpotMap({
   });
 
   const internalRef = useRef<google.maps.Map | null>(null);
-  const lastCenterRef = useRef<LocationCoords | null>(null);
   const [center, setCenter] = useState<LocationCoords | null>(null);
   const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -101,6 +100,7 @@ export default function SpotMap({
   }, []);
 
   // 中心地点が変更されたら、近いスポットを計算
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
     if (!center) return;
 
@@ -129,7 +129,7 @@ export default function SpotMap({
     // 結果が実際に変わったときだけ state を更新して親に通知
     setNearbySpots(nearby);
     onUpdateNearbySpots(nearby);
-  }, [center, allSpots, onUpdateNearbySpots]);
+  }, [center, allSpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     internalRef.current = map;
@@ -141,24 +141,11 @@ export default function SpotMap({
     }
   }, [center, mapRef]);
 
-  // 地図が止まったときに近いスポットを更新（onIdle で無限ループを防止）
+  // 地図が止まったときに近いスポットを更新（onIdle）
+  // setCenter は呼ばない（無限ループを防ぐため）。center は検索と現在地取得時だけ更新
   const handleMapIdle = useCallback(() => {
-    if (!internalRef.current) return;
-    const mapCenter = internalRef.current.getCenter();
-    if (!mapCenter) return;
-
-    const newCenter = {
-      lat: mapCenter.lat(),
-      lng: mapCenter.lng(),
-    };
-
-    // 前回の中心から移動が検出された場合のみ state を更新
-    if (!lastCenterRef.current ||
-        Math.abs(lastCenterRef.current.lat - newCenter.lat) > 0.001 ||
-        Math.abs(lastCenterRef.current.lng - newCenter.lng) > 0.001) {
-      lastCenterRef.current = newCenter;
-      setCenter(newCenter);
-    }
+    // onIdle イベントは地図の状態追跡のみ。center state 更新はしない
+    // これにより無限ループ（地図移動 → setCenter → 再描画 → onIdle 再発火）を防止
   }, []);
 
   if (!isLoaded) {
