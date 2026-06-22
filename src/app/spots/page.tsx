@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { getSpots } from '@/lib/firebase/spots';
 import { geocodeAddress } from '@/lib/location-utils';
 import SpotMap from '@/components/SpotMap';
@@ -61,7 +61,8 @@ function SpotsPageContent() {
     setNearbySpots(spots);
   }, []);
 
-  const allData = [...allSpots, ...michinoekiData];
+  // allData をメモ化して、allSpots と michinoekiData が変わらない限り同じオブジェクト参照を保つ
+  const allData = useMemo(() => [...allSpots, ...michinoekiData], [allSpots, michinoekiData]);
 
   const ListContent = (
     <div className="space-y-2">
