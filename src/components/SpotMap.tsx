@@ -68,6 +68,7 @@ export default function SpotMap({
   });
 
   const internalRef = useRef<google.maps.Map | null>(null);
+  const lastCenterRef = useRef<LocationCoords | null>(null);
   const [center, setCenter] = useState<LocationCoords | null>(null);
   const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -136,14 +137,23 @@ export default function SpotMap({
     }
   }, [center, mapRef]);
 
-  const handleMapCenterChanged = useCallback(() => {
+  // 地図が止まったときに近いスポットを更新（onIdle で無限ループを防止）
+  const handleMapIdle = useCallback(() => {
     if (!internalRef.current) return;
-    const newCenter = internalRef.current.getCenter();
-    if (newCenter) {
-      setCenter({
-        lat: newCenter.lat(),
-        lng: newCenter.lng(),
-      });
+    const mapCenter = internalRef.current.getCenter();
+    if (!mapCenter) return;
+
+    const newCenter = {
+      lat: mapCenter.lat(),
+      lng: mapCenter.lng(),
+    };
+
+    // 前回の中心から移動が検出された場合のみ state を更新
+    if (!lastCenterRef.current ||
+        Math.abs(lastCenterRef.current.lat - newCenter.lat) > 0.001 ||
+        Math.abs(lastCenterRef.current.lng - newCenter.lng) > 0.001) {
+      lastCenterRef.current = newCenter;
+      setCenter(newCenter);
     }
   }, []);
 
@@ -197,7 +207,7 @@ export default function SpotMap({
         zoom={13}
         options={mapOptions}
         onLoad={onLoad}
-        onCenterChanged={handleMapCenterChanged}
+        onIdle={handleMapIdle}
       >
         {/* 現在地マーカー */}
         <MarkerF
