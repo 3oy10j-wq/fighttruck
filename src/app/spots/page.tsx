@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { getSpots } from '@/lib/firebase/spots';
 import { geocodeAddress } from '@/lib/location-utils';
 import SpotMap from '@/components/SpotMap';
@@ -55,6 +55,11 @@ function SpotsPageContent() {
       handleSearch();
     }
   };
+
+  // onUpdateNearbySpots をメモ化して、毎回同じ関数参照にする
+  const handleUpdateNearbySpots = useCallback((spots: SpotWithDistance[]) => {
+    setNearbySpots(spots);
+  }, []);
 
   const allData = [...allSpots, ...michinoekiData];
 
@@ -151,7 +156,7 @@ function SpotsPageContent() {
             allSpots={allData}
             selectedSpot={selectedSpot}
             onSelectSpot={setSelectedSpot}
-            onUpdateNearbySpots={setNearbySpots}
+            onUpdateNearbySpots={handleUpdateNearbySpots}
             mapRef={mapRef}
           />
         </div>
@@ -198,7 +203,7 @@ function SpotsPageContent() {
               allSpots={allData}
               selectedSpot={selectedSpot}
               onSelectSpot={setSelectedSpot}
-              onUpdateNearbySpots={setNearbySpots}
+              onUpdateNearbySpots={handleUpdateNearbySpots}
               mapRef={mapRef}
             />
           )}

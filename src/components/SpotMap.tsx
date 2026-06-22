@@ -104,34 +104,31 @@ export default function SpotMap({
   useEffect(() => {
     if (!center) return;
 
-    const updateNearby = () => {
-      const nearby = allSpots
-        .filter((spot) => {
-          // 有効な座標をチェック
-          return (
-            typeof spot.lat === 'number' &&
-            typeof spot.lng === 'number' &&
-            !isNaN(spot.lat) &&
-            !isNaN(spot.lng) &&
-            spot.lat >= -90 &&
-            spot.lat <= 90 &&
-            spot.lng >= -180 &&
-            spot.lng <= 180
-          );
-        })
-        .map((spot) => ({
-          ...spot,
-          distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
-        }))
-        .filter((spot) => spot.distance <= NEARBY_RADIUS_KM)
-        .sort((a, b) => a.distance - b.distance)
-        .slice(0, DISPLAY_LIMIT);
+    const nearby = allSpots
+      .filter((spot) => {
+        // 有効な座標をチェック
+        return (
+          typeof spot.lat === 'number' &&
+          typeof spot.lng === 'number' &&
+          !isNaN(spot.lat) &&
+          !isNaN(spot.lng) &&
+          spot.lat >= -90 &&
+          spot.lat <= 90 &&
+          spot.lng >= -180 &&
+          spot.lng <= 180
+        );
+      })
+      .map((spot) => ({
+        ...spot,
+        distance: calculateDistance(center, { lat: spot.lat, lng: spot.lng }),
+      }))
+      .filter((spot) => spot.distance <= NEARBY_RADIUS_KM)
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, DISPLAY_LIMIT);
 
-      setNearbySpots(nearby);
-      onUpdateNearbySpots(nearby);
-    };
-
-    updateNearby();
+    // 結果が実際に変わったときだけ state を更新して親に通知
+    setNearbySpots(nearby);
+    onUpdateNearbySpots(nearby);
   }, [center, allSpots, onUpdateNearbySpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
