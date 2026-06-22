@@ -103,9 +103,13 @@ export default async function SpotDetailPage({ params }: Props) {
 
         <div className="pt-2">
           <a
-            href={spot.placeId
-              ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`
-              : `https://maps.google.com/?q=${spot.lat},${spot.lng}`
+            href={
+              (() => {
+                const query = spot.name.includes('道の駅')
+                  ? spot.name
+                  : `道の駅${spot.name}`;
+                return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+              })()
             }
             target="_blank"
             rel="noopener noreferrer"

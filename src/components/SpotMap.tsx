@@ -38,10 +38,12 @@ interface SpotWithDistance extends Spot {
 }
 
 function getMapsUrl(spot: Spot): string {
-  if (spot.placeId) {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(spot.name)}&query_place_id=${spot.placeId}`;
-  }
-  return `https://maps.google.com/?q=${spot.lat},${spot.lng}`;
+  // 施設名ベースの検索リンク（placeID の誤りを回避）
+  // 「道の駅」を含める（重複を防ぐ）
+  const query = spot.name.includes('道の駅')
+    ? spot.name
+    : `道の駅${spot.name}`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
 }
 
 interface SpotMapProps {
