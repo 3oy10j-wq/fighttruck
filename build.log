@@ -1,0 +1,59 @@
+
+> fighttruck@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.19
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ⚠ Compiled with warnings in 8.4s
+
+./node_modules/@protobufjs/inquire/index.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/@protobufjs/inquire/index.js
+./node_modules/protobufjs/src/util/minimal.js
+./node_modules/protobufjs/src/index-minimal.js
+./node_modules/protobufjs/src/index-light.js
+./node_modules/protobufjs/src/index.js
+./node_modules/protobufjs/index.js
+./node_modules/@grpc/proto-loader/build/src/index.js
+./node_modules/@firebase/firestore/dist/index.node.mjs
+./node_modules/firebase/firestore/dist/index.mjs
+./src/lib/firebase/spots.ts
+./src/app/spots/[id]/page.tsx
+
+ ✓ Compiled successfully in 15.0s
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/9) ...
+   Generating static pages (2/9) 
+   Generating static pages (4/9) 
+   Generating static pages (6/9) 
+ ✓ Generating static pages (9/9)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ○ /                                      165 B         106 kB
+├ ○ /_not-found                            995 B         103 kB
+├ ○ /login                               1.97 kB         224 kB
+├ ○ /mypage                              1.88 kB         220 kB
+├ ○ /register                            2.05 kB         224 kB
+├ ○ /spots                               36.8 kB         255 kB
+└ ƒ /spots/[id]                            165 B         106 kB
++ First Load JS shared by all             102 kB
+  ├ chunks/255-98a0bdaa30757bda.js       46.2 kB
+  ├ chunks/4bd1b696-c023c6e3521b1417.js  54.2 kB
+  └ other shared chunks (total)          2.01 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+
+npm notice
+npm notice New minor version of npm available! 11.13.0 -> 11.17.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v11.17.0
+npm notice To update run: npm install -g npm@11.17.0
+npm notice
