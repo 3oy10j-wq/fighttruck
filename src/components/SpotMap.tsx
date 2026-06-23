@@ -100,7 +100,6 @@ export default function SpotMap({
   }, []);
 
   // 中心地点が変更されたら、近いスポットを計算
-  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
   useEffect(() => {
     if (!center) return;
 
@@ -127,9 +126,10 @@ export default function SpotMap({
       .slice(0, DISPLAY_LIMIT);
 
     // 結果が実際に変わったときだけ state を更新して親に通知
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setNearbySpots(nearby);
     onUpdateNearbySpots(nearby);
-  }, [center, allSpots]);
+  }, [center, allSpots, onUpdateNearbySpots]);
 
   const onLoad = useCallback((map: google.maps.Map) => {
     internalRef.current = map;

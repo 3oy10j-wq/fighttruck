@@ -40,14 +40,20 @@ function SpotsPageContent() {
     if (!searchInput.trim()) return;
 
     setSearching(true);
-    const coords = await geocodeAddress(searchInput);
+    try {
+      const coords = await geocodeAddress(searchInput);
 
-    if (coords && mapRef.current) {
-      mapRef.current.setCenter(coords);
-      mapRef.current.setZoom(13);
+      if (coords && mapRef.current) {
+        mapRef.current.setCenter(coords);
+        mapRef.current.setZoom(13);
+      } else {
+        console.warn('検索失敗: 座標またはマップが見つかりません', { coords, mapRef: mapRef.current });
+      }
+    } catch (error) {
+      console.error('検索エラー:', error);
+    } finally {
+      setSearching(false);
     }
-
-    setSearching(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
