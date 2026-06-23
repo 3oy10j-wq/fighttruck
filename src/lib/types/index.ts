@@ -48,3 +48,20 @@ export interface Spot {
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }
+
+export interface Report {
+  id: string;
+  spotId: string;
+  userId: string;
+  userName: string;
+  timestamp: Timestamp;
+  ratings: {
+    parking_ease: number;
+    cleanliness: number;
+    overall_satisfaction: number;
+    can_park: boolean;
+  };
+  comment: string;
+  imageUrl: string;
+  status: 'published';
+}

@@ -4,6 +4,7 @@ import { useCallback, useRef, useEffect, useState } from 'react';
 import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { SPOT_TYPE_COLORS } from '@/lib/constants';
 import { calculateDistance, getCurrentLocation, LocationCoords } from '@/lib/location-utils';
+import ReportModal from '@/components/ReportModal';
 import type { Spot } from '@/lib/types';
 
 const containerStyle = {
@@ -78,6 +79,7 @@ export default function SpotMap({
   const [center, setCenter] = useState<LocationCoords | null>(null);
   const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const [reportModalSpot, setReportModalSpot] = useState<Spot | null>(null);
 
   // 初期現在地取得
   useEffect(() => {
@@ -261,20 +263,41 @@ export default function SpotMap({
                 <p className="text-xs text-gray-500 mb-2">
                   📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance?.toFixed(1) || '?'}km
                 </p>
-                <a
-                  href={getMapsUrl(selectedSpot)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"
-                >
-                  🗺 Google Mapsで開く
-                </a>
+                <div className="space-y-2">
+                  <button
+                    onClick={() => setReportModalSpot(selectedSpot)}
+                    className="block w-full rounded-lg bg-blue-500 py-2 text-center text-xs font-bold text-white hover:bg-blue-600"
+                  >
+                    📝 レポートを投稿
+                  </button>
+                  <a
+                    href={getMapsUrl(selectedSpot)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"
+                  >
+                    🗺 Google Mapsで開く
+                  </a>
+                </div>
               </div>
             </InfoWindowF>
           );
         })()}
       </GoogleMap>
       </div>
+
+      {/* Report Modal */}
+      {reportModalSpot && (
+        <ReportModal
+          spotId={reportModalSpot.id}
+          spotName={reportModalSpot.name}
+          onClose={() => setReportModalSpot(null)}
+          onSuccess={() => {
+            setReportModalSpot(null);
+            // Optional: Refresh reports data here if needed
+          }}
+        />
+      )}
     </div>
   );
 }

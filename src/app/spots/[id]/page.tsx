@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { getSpotById } from '@/lib/firebase/spots';
 import { FACILITY_LABELS, REGION_LABELS } from '@/lib/constants';
+import SpotReportSection from '@/components/SpotReportSection';
 import type { SpotFacilities } from '@/lib/types';
 
 const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as (keyof SpotFacilities)[];
@@ -118,6 +119,9 @@ export default async function SpotDetailPage({ params }: Props) {
             Google Mapsで開く
           </a>
         </div>
+
+        {/* Community Reports Section */}
+        <SpotReportSection spot={spot} />
 
       </div>
     </div>
