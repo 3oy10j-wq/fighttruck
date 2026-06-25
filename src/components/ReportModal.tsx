@@ -116,20 +116,31 @@ export default function ReportModal({
     }
   };
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only close if clicking on the backdrop itself, not the modal content
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 pointer-events-auto"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
     >
-      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg">
+      <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-lg pointer-events-auto">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-gray-900">{spotName}</h2>
+          <h2 id="modal-title" className="text-lg font-bold text-gray-900">
+            {spotName}
+          </h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-2xl text-gray-500 hover:text-gray-700 font-bold"
+            className="text-2xl text-gray-500 hover:text-gray-700 font-bold p-1"
+            aria-label="閉じる"
           >
             ×
           </button>
@@ -190,7 +201,7 @@ export default function ReportModal({
                 <button
                   type="button"
                   onClick={() => setCanPark(true)}
-                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors cursor-pointer ${
                     canPark
                       ? 'bg-green-500 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -201,7 +212,7 @@ export default function ReportModal({
                 <button
                   type="button"
                   onClick={() => setCanPark(false)}
-                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2 rounded-lg font-semibold transition-colors cursor-pointer ${
                     !canPark
                       ? 'bg-red-500 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -241,7 +252,7 @@ export default function ReportModal({
                   <button
                     type="button"
                     onClick={handleRemoveImage}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 cursor-pointer"
                   >
                     ×
                   </button>
@@ -250,7 +261,7 @@ export default function ReportModal({
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 transition-colors text-gray-600 hover:text-orange-500"
+                  className="w-full py-2 border-2 border-dashed border-gray-300 rounded-lg hover:border-orange-500 transition-colors text-gray-600 hover:text-orange-500 cursor-pointer"
                 >
                   📷 画像を選択
                 </button>
@@ -268,7 +279,7 @@ export default function ReportModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 disabled:bg-gray-400 transition-colors"
+              className="w-full py-3 bg-orange-500 text-white font-bold rounded-lg hover:bg-orange-600 disabled:bg-gray-400 transition-colors cursor-pointer"
             >
               {loading ? '送信中...' : 'レポートを送信'}
             </button>
