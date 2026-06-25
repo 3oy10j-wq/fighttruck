@@ -27,9 +27,14 @@ function SpotsPageContent() {
       getSpots(),
       fetch('/michinoeki-data.json').then(r => r.json()).then(d => d.data || []),
     ])
-      .then(([official, michinoeki]) => {
+      .then(([official, michinoeki]: [Spot[], Record<string, unknown>[]]) => {
         setAllSpots(official);
-        setMichinoekiData(michinoeki);
+        // 道の駅データに id フィールドを追加（name をベースに生成）
+        const michinoekiWithId = michinoeki.map((spot, index: number) => ({
+          id: `michinoeki_${index}_${String(spot.name)}`,
+          ...spot,
+        } as Spot));
+        setMichinoekiData(michinoekiWithId);
       })
       .catch(e => console.error('データ読み込みエラー:', e))
       .finally(() => setLoading(false));

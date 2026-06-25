@@ -75,6 +75,12 @@ export default function ReportModal({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    // Validate spotId
+    if (!spotId) {
+      setError('エラー: スポットIDが設定されていません');
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
