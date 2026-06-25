@@ -74,10 +74,6 @@ export default function ReportModal({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!user) {
-      setError('ログインしてください');
-      return;
-    }
 
     setLoading(true);
     setError(null);
@@ -89,10 +85,14 @@ export default function ReportModal({
         imageUrl = await uploadReportImage(imageFile, spotId);
       }
 
+      // Generate anonymous user ID if not logged in
+      const userId = user?.uid || `anonymous_${Date.now()}`;
+      const displayName = userName || '匿名ドライバー';
+
       await createReport(
         spotId,
-        user.uid,
-        userName || profile?.name || '匿名',
+        userId,
+        displayName,
         {
           parking_ease: parkingEase,
           cleanliness: cleanliness,
@@ -116,24 +116,6 @@ export default function ReportModal({
     }
   };
 
-  if (!user) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-          <p className="text-center text-gray-900 font-semibold mb-4">
-            レポートを送信するにはログインしてください
-          </p>
-          <button
-            onClick={onClose}
-            className="w-full px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-          >
-            閉じる
-          </button>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -145,8 +127,9 @@ export default function ReportModal({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-900">{spotName}</h2>
           <button
+            type="button"
             onClick={onClose}
-            className="text-2xl text-gray-500 hover:text-gray-700"
+            className="text-2xl text-gray-500 hover:text-gray-700 font-bold"
           >
             ×
           </button>
@@ -174,7 +157,7 @@ export default function ReportModal({
                 type="text"
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                placeholder="匿名で送信"
+                placeholder="匿名ドライバーで送信"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>

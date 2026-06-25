@@ -12,9 +12,9 @@ service cloud.firestore {
     }
 
     match /reports/{reportId} {
-      allow create: if request.auth != null;
+      allow create: if true;
       allow read: if true;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
     }
   }
 }

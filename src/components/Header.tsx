@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/hooks/useAuth';
 
 const NAV_LINKS = [
   { href: '/spots', label: 'スポット検索' },
+  { href: '/reports', label: 'みんなの報告' },
 ] as const;
 
 export default function Header() {
