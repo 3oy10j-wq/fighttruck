@@ -52,6 +52,7 @@ export interface Spot {
 export interface Report {
   id: string;
   spotId: string;
+  spotName?: string;
   userId: string;
   userName: string;
   timestamp: Timestamp;

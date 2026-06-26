@@ -97,6 +97,7 @@ export default function ReportModal({
 
       await createReport(
         spotId,
+        spotName,
         userId,
         displayName,
         {

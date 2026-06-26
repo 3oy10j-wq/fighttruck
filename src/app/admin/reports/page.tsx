@@ -64,8 +64,8 @@ export default function AdminReportsPage() {
     }
   };
 
-  const getSpotName = (spotId: string) => {
-    return spots.find((s) => s.id === spotId)?.name || '不明なスポット';
+  const getSpotName = (report: Report) => {
+    return report.spotName || spots.find((s) => s.id === report.spotId)?.name || '不明なスポット';
   };
 
   if (!user) {
@@ -134,7 +134,7 @@ export default function AdminReportsPage() {
                 >
                   <div className="px-4 py-3 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
                     <div className="text-sm font-semibold text-gray-900">
-                      {getSpotName(report.spotId)}
+                      {getSpotName(report)}
                     </div>
                     <button
                       onClick={() => handleDelete(report.id)}

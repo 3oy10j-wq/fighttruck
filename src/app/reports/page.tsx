@@ -58,8 +58,29 @@ export default function ReportsPage() {
     return avgB - avgA;
   });
 
-  const getSpotName = (spotId: string) => {
-    return spots.find((s) => s.id === spotId)?.name || '不明なスポット';
+  const getSpotName = (report: Report) => {
+    // spotName があればそれを使用
+    if (report.spotName) {
+      return report.spotName;
+    }
+
+    // Firestore スポットから検索
+    const firestoreSpot = spots.find((s) => s.id === report.spotId);
+    if (firestoreSpot) {
+      return firestoreSpot.name;
+    }
+
+    // 道の駅データの場合、spotId から名前を抽出
+    // spotId形式: michinoeki_${index}_${name}
+    if (report.spotId.startsWith('michinoeki_')) {
+      const parts = report.spotId.split('_');
+      if (parts.length >= 3) {
+        // 最後の部分（またはアンダースコア区切りで複数ワードの場合）をスポット名として使用
+        return parts.slice(2).join('_');
+      }
+    }
+
+    return '不明なスポット';
   };
 
   return (
@@ -148,7 +169,7 @@ export default function ReportsPage() {
               {sortedReports.map((report) => (
                 <div key={report.id} className="space-y-2">
                   <div className="text-xs text-gray-500 font-semibold px-2">
-                    {getSpotName(report.spotId)}
+                    {getSpotName(report)}
                   </div>
                   <ReportCard report={report} compact={false} />
                 </div>

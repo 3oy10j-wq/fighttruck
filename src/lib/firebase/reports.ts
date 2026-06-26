@@ -17,6 +17,7 @@ import type { Report } from '@/lib/types';
 
 export async function createReport(
   spotId: string,
+  spotName: string,
   userId: string,
   userName: string,
   ratings: Report['ratings'],
@@ -28,6 +29,7 @@ export async function createReport(
     const reportsRef = collection(db, 'reports');
     const docRef = await addDoc(reportsRef, {
       spotId,
+      spotName,
       userId,
       userName: userName || '匿名',
       timestamp: Timestamp.now(),
