@@ -26,7 +26,8 @@ export const SPOT_TYPE_LABELS: Record<'official_rest' | 'michinoeki', string> = 
   michinoeki: '道の駅',
 };
 
-export const SPOT_TYPE_COLORS: Record<'official_rest' | 'michinoeki', string> = {
+export const SPOT_TYPE_COLORS: Record<'official_rest' | 'michinoeki' | 'user_submitted', string> = {
   official_rest: '#f97316',
   michinoeki: '#3b82f6',
+  user_submitted: '#22c55e',  // ユーザー追加スポット（緑）
 };

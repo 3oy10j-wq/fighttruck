@@ -9,7 +9,6 @@ export interface LocationCoords {
 
 // ハバーサイン公式で2点間の距離（km）を計算
 export function calculateDistance(from: LocationCoords, to: LocationCoords): number {
-  // 入力値の有効性チェック
   if (
     !from ||
     !to ||
@@ -25,7 +24,7 @@ export function calculateDistance(from: LocationCoords, to: LocationCoords): num
     return 0;
   }
 
-  const R = 6371; // 地球の半径（km）
+  const R = 6371;
   const dLat = ((to.lat - from.lat) * Math.PI) / 180;
   const dLng = ((to.lng - from.lng) * Math.PI) / 180;
   const a =
@@ -60,28 +59,37 @@ export function getCurrentLocation(): Promise<LocationCoords> {
   });
 }
 
-// アドレスを座標に変換（Geocoding API）
+// アドレスを座標に変換（Geocoding API）- 精度向上版
 export async function geocodeAddress(address: string): Promise<LocationCoords | null> {
-  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) return null;
-
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&region=JP&key=${apiKey}`;
-
   try {
-    const res = await fetch(url);
-    const json = await res.json();
-
-    if (json.status !== 'OK' || !json.results[0]) {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (!apiKey) {
+      console.error('❌ API キーが設定されていません');
       return null;
     }
 
-    const loc = json.results[0].geometry.location;
-    return {
-      lat: loc.lat,
-      lng: loc.lng,
-    };
-  } catch (e) {
-    console.error('Geocoding error:', e);
+    // 日本の主要都市の場合、駅を追加して精度を向上
+    let searchQuery = address;
+    const majorCities = ['東京', '大阪', '名古屋', '京都', '横浜', '福岡', '札幌', '広島', '神戸', '仙台'];
+    if (majorCities.some(city => address.includes(city)) && !address.includes('駅')) {
+      searchQuery = `${address}駅`;
+    }
+
+    const encodedAddress = encodeURIComponent(searchQuery);
+    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&region=JP&key=${apiKey}`;
+
+    const response = await fetch(url);
+    const data = await response.json();
+
+    if (data.status === 'OK' && data.results?.[0]) {
+      const location = data.results[0].geometry.location;
+      return { lat: location.lat, lng: location.lng };
+    }
+
+    console.warn('⚠️ ジオコード失敗:', data.status, '検索:', searchQuery);
+    return null;
+  } catch (err) {
+    console.error('❌ geocodeAddress エラー:', err);
     return null;
   }
 }

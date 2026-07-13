@@ -4,12 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
+import { Truck } from 'lucide-react';
 import { getFirebaseAuth } from '@/lib/firebase/config';
 import { useAuth } from '@/lib/hooks/useAuth';
+import { isAdmin } from '@/lib/firebase/admin';
 
 const NAV_LINKS = [
   { href: '/spots', label: 'スポット検索' },
   { href: '/reports', label: 'みんなの報告' },
+  { href: '/contact', label: 'お問い合わせ' },
 ] as const;
 
 export default function Header() {
@@ -29,15 +32,21 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-[100] border-b border-white/10 bg-[#0a0f1e]/95 backdrop-blur-sm pointer-events-auto">
+    <header className="sticky top-0 z-[100] border-b bg-white pointer-events-auto" style={{ borderColor: '#EEECE5' }}>
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
 
         {/* ロゴ */}
         <Link
           href="/"
-          className="flex items-center gap-2 text-xl font-bold text-white transition-opacity hover:opacity-80"
+          className="flex items-center gap-2.5 text-xl font-bold transition-opacity hover:opacity-80"
+          style={{ color: '#1F2933' }}
         >
-          <span className="text-2xl">🚛</span>
+          <Truck
+            size={30}
+            strokeWidth={1.8}
+            className="flex-shrink-0"
+            style={{ color: '#E8722C' }}
+          />
           <span>ファイトラック</span>
         </Link>
 
@@ -47,11 +56,10 @@ export default function Header() {
             <Link
               key={href}
               href={href}
-              className={`text-sm font-medium transition-colors ${
-                isActive(href)
-                  ? 'text-[#f97316]'
-                  : 'text-[#e2e8f0]/70 hover:text-white'
-              }`}
+              className="text-sm font-medium transition-colors"
+              style={{ color: isActive(href) ? '#E8722C' : '#52606D' }}
+              onMouseEnter={(e) => !isActive(href) && (e.currentTarget.style.color = '#E8722C')}
+              onMouseLeave={(e) => !isActive(href) && (e.currentTarget.style.color = '#52606D')}
             >
               {label}
             </Link>
@@ -60,18 +68,31 @@ export default function Header() {
           {!loading && (
             user ? (
               <div className="flex items-center gap-4">
+                {isAdmin(user.email) && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="text-sm font-medium transition-colors"
+                    style={{ color: isActive('/admin/dashboard') ? '#E8722C' : '#52606D' }}
+                    onMouseEnter={(e) => !isActive('/admin/dashboard') && (e.currentTarget.style.color = '#E8722C')}
+                    onMouseLeave={(e) => !isActive('/admin/dashboard') && (e.currentTarget.style.color = '#52606D')}
+                  >
+                    🛠 管理画面
+                  </Link>
+                )}
                 <Link
                   href="/mypage"
-                  className={`text-sm font-medium transition-colors ${
-                    isActive('/mypage') ? 'text-[#f97316]' : 'text-[#e2e8f0]/70 hover:text-white'
-                  }`}
+                  className="text-sm font-medium transition-colors"
+                  style={{ color: isActive('/mypage') ? '#E8722C' : '#52606D' }}
+                  onMouseEnter={(e) => !isActive('/mypage') && (e.currentTarget.style.color = '#E8722C')}
+                  onMouseLeave={(e) => !isActive('/mypage') && (e.currentTarget.style.color = '#52606D')}
                 >
                   マイページ
                 </Link>
                 <button
                   type="button"
                   onClick={handleSignOut}
-                  className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-[#e2e8f0] transition-all hover:border-white/40 hover:bg-white/10"
+                  className="rounded-full border px-4 py-2 text-sm font-medium transition-all hover:bg-gray-50"
+                  style={{ borderColor: '#D5D3CB', color: '#1F2933' }}
                 >
                   ログアウト
                 </button>
@@ -80,13 +101,15 @@ export default function Header() {
               <div className="flex items-center gap-3">
                 <Link
                   href="/login"
-                  className="text-sm font-medium text-[#e2e8f0]/70 transition-colors hover:text-white"
+                  className="text-sm font-medium transition-colors hover:text-[#E8722C]"
+                  style={{ color: '#52606D' }}
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-full bg-[#f97316] px-5 py-2 text-sm font-bold text-white transition-all hover:scale-105 hover:bg-[#ea6d0e] hover:shadow-lg hover:shadow-orange-500/30"
+                  className="rounded-full px-5 py-2 text-sm font-bold text-white transition-all hover:scale-105 hover:bg-orange-600 hover:shadow-lg hover:shadow-orange-500/30"
+                  style={{ backgroundColor: '#E8722C' }}
                 >
                   新規登録
                 </Link>
@@ -110,14 +133,15 @@ export default function Header() {
 
       {/* スマホメニュー */}
       {menuOpen && (
-        <div className="border-t border-white/10 bg-[#111827] px-4 py-6 md:hidden">
+        <div className="border-t px-4 py-6 md:hidden" style={{ borderColor: '#EEECE5', backgroundColor: '#FAFAF8' }}>
           <nav className="flex flex-col gap-5">
             {NAV_LINKS.map(({ href, label }) => (
               <Link
                 key={href}
                 href={href}
                 onClick={() => setMenuOpen(false)}
-                className={`text-base font-medium ${isActive(href) ? 'text-[#f97316]' : 'text-[#e2e8f0]'}`}
+                className="text-base font-medium"
+                style={{ color: isActive(href) ? '#E8722C' : '#52606D' }}
               >
                 {label}
               </Link>
@@ -126,17 +150,29 @@ export default function Header() {
             {!loading && (
               user ? (
                 <>
+                  {isAdmin(user.email) && (
+                    <Link
+                      href="/admin/dashboard"
+                      onClick={() => setMenuOpen(false)}
+                      className="text-base font-medium"
+                      style={{ color: isActive('/admin/dashboard') ? '#E8722C' : '#52606D' }}
+                    >
+                      🛠 管理画面
+                    </Link>
+                  )}
                   <Link
                     href="/mypage"
                     onClick={() => setMenuOpen(false)}
-                    className={`text-base font-medium ${isActive('/mypage') ? 'text-[#f97316]' : 'text-[#e2e8f0]'}`}
+                    className="text-base font-medium"
+                    style={{ color: isActive('/mypage') ? '#E8722C' : '#52606D' }}
                   >
                     マイページ
                   </Link>
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="w-full rounded-full border border-white/20 py-3 text-sm font-medium text-[#e2e8f0]"
+                    className="w-full rounded-full border py-3 text-sm font-medium"
+                    style={{ borderColor: '#D5D3CB', color: '#1F2933' }}
                   >
                     ログアウト
                   </button>
@@ -146,14 +182,16 @@ export default function Header() {
                   <Link
                     href="/login"
                     onClick={() => setMenuOpen(false)}
-                    className="text-base font-medium text-[#e2e8f0]"
+                    className="text-base font-medium"
+                    style={{ color: '#52606D' }}
                   >
                     ログイン
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMenuOpen(false)}
-                    className="rounded-full bg-[#f97316] py-3 text-center text-sm font-bold text-white"
+                    className="rounded-full py-3 text-center text-sm font-bold text-white"
+                    style={{ backgroundColor: '#E8722C' }}
                   >
                     新規登録
                   </Link>

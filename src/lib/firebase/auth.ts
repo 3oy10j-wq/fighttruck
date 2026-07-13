@@ -7,6 +7,7 @@ import {
   sendPasswordResetEmail,
   updateProfile,
   User,
+  fetchSignInMethodsForEmail,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getFirebaseAuth, getFirebaseDb } from './config';
@@ -33,6 +34,15 @@ export async function loginWithEmail(email: string, password: string) {
 
 export async function logout() {
   await signOut(getFirebaseAuth());
+}
+
+export async function getSignInMethods(email: string): Promise<string[]> {
+  try {
+    return await fetchSignInMethodsForEmail(getFirebaseAuth(), email);
+  } catch (error) {
+    console.error('ログイン方法取得エラー:', error);
+    return [];
+  }
 }
 
 export async function resetPassword(email: string) {

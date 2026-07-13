@@ -44,8 +44,8 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-base px-4 py-12">
       <div className="w-full max-w-md space-y-6 rounded-2xl border border-accent/20 bg-white p-8 shadow-sm">
         <div className="text-center">
-          <h1 className="font-serif text-2xl font-bold text-ink">新規登録</h1>
-          <p className="mt-2 text-sm text-ink/60">
+          <h1 className="font-serif text-2xl font-bold text-black">新規登録</h1>
+          <p className="mt-2 text-sm text-gray-700">
             FightTruckのアカウントを作成
           </p>
         </div>
@@ -58,7 +58,7 @@ export default function RegisterPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-ink">
+            <label htmlFor="name" className="block text-sm font-medium text-black">
               お名前
             </label>
             <input
@@ -68,11 +68,11 @@ export default function RegisterPage() {
               autoComplete="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-black font-medium focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-gray-500"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-ink">
+            <label htmlFor="email" className="block text-sm font-medium text-black">
               メールアドレス
             </label>
             <input
@@ -82,11 +82,11 @@ export default function RegisterPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-black font-medium focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-gray-500"
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-ink">
+            <label htmlFor="password" className="block text-sm font-medium text-black">
               パスワード
             </label>
             <input
@@ -97,7 +97,7 @@ export default function RegisterPage() {
               autoComplete="new-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-ink/15 px-3 py-2 text-ink focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+              className="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-black font-medium focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent placeholder:text-gray-500"
             />
           </div>
 
@@ -111,21 +111,21 @@ export default function RegisterPage() {
         </form>
 
         <div className="flex items-center gap-4">
-          <div className="h-px flex-1 bg-ink/10" />
-          <span className="text-xs text-ink/40">または</span>
-          <div className="h-px flex-1 bg-ink/10" />
+          <div className="h-px flex-1 bg-gray-300" />
+          <span className="text-xs text-gray-600">または</span>
+          <div className="h-px flex-1 bg-gray-300" />
         </div>
 
         <button
           type="button"
           onClick={handleGoogleSignUp}
           disabled={loading}
-          className="flex w-full items-center justify-center gap-2 rounded-lg border border-ink/15 py-2.5 font-medium text-ink transition hover:bg-ink/5 disabled:opacity-50"
+          className="flex w-full items-center justify-center gap-2 rounded-lg border border-gray-300 py-2.5 font-medium text-black transition hover:bg-gray-100 disabled:opacity-50"
         >
           Googleで登録
         </button>
 
-        <p className="text-center text-sm text-ink/60">
+        <p className="text-center text-sm text-gray-700">
           すでにアカウントをお持ちの方は{' '}
           <Link href="/login" className="font-medium text-accent hover:underline">
             ログイン

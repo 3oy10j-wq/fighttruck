@@ -4,17 +4,29 @@ service cloud.firestore {
   match /databases/{database}/documents {
     match /spots/{spotId} {
       allow read: if true;
-      allow write: if false;
+      // 管理者のみ書き込み可能（ユーザー申請の承認時）
+      allow write: if request.auth.token.email == 'gensui1732x@gmail.com';
     }
 
     match /users/{userId} {
+      // 管理者（gensui1732x@gmail.com）は全ユーザーを読める（統計集計用）
+      allow read: if request.auth.token.email == 'gensui1732x@gmail.com';
+      // ログイン済みなら自分のドキュメントは読み書きできる
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     match /reports/{reportId} {
       allow create: if true;
       allow read: if true;
+      allow update: if request.auth != null && request.auth.uid == resource.data.userId;
       allow delete: if request.auth != null && request.auth.uid == resource.data.userId;
+    }
+
+    match /spot_submissions/{submissionId} {
+      // 匿名でも申請可能
+      allow create: if true;
+      // 管理者のみ読み取り・更新・削除可能
+      allow read, update, delete: if request.auth.token.email == 'gensui1732x@gmail.com';
     }
   }
 }

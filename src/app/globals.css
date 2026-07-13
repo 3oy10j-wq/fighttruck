@@ -13,7 +13,12 @@
   /* 旧変数 — 既存ページが使う場合のフォールバック */
   --color-base:    #0a0f1e;
   --color-accent:  #f97316;
-  --color-ink:     #e2e8f0;
+  --color-ink:     #0f172a;  /* Changed from #e2e8f0 to dark color for better contrast on white cards */
+
+  /* テキスト色の明確な定義 */
+  --color-text-primary:   #0f172a;  /* Very dark, almost black - for main text */
+  --color-text-secondary: #475569;  /* Medium gray - for secondary text */
+  --color-text-tertiary:  #94a3b8;  /* Light gray - for muted/helper text */
 }
 
 @theme inline {

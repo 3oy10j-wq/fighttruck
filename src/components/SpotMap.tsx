@@ -1,9 +1,10 @@
 'use client';
 
-import { useCallback, useRef, useEffect, useState } from 'react';
+import { useCallback, useRef, useEffect, useState, useImperativeHandle, forwardRef } from 'react';
 import { GoogleMap, MarkerF, InfoWindowF, useJsApiLoader } from '@react-google-maps/api';
 import { SPOT_TYPE_COLORS } from '@/lib/constants';
 import { calculateDistance, getCurrentLocation, LocationCoords } from '@/lib/location-utils';
+import { useAuth } from '@/lib/hooks/useAuth';
 import ReportModal from '@/components/ReportModal';
 import type { Spot } from '@/lib/types';
 
@@ -58,18 +59,29 @@ interface SpotMapProps {
   onSelectSpot: (spot: Spot | null) => void;
   onUpdateNearbySpots: (spots: SpotWithDistance[]) => void;
   mapRef?: React.MutableRefObject<google.maps.Map | null>;
+  searchedLocation?: { coords: LocationCoords; query: string } | null;  // 検索した地点の情報
 }
 
 const NEARBY_RADIUS_KM = 20;
 const DISPLAY_LIMIT = 20;
 
-export default function SpotMap({
-  allSpots,
-  selectedSpot,
-  onSelectSpot,
-  onUpdateNearbySpots,
-  mapRef,
-}: SpotMapProps) {
+export interface SpotMapHandle {
+  setCenterTo: (coords: LocationCoords) => void;
+}
+
+const SpotMapComponent = forwardRef<SpotMapHandle, SpotMapProps>(
+  (
+    {
+      allSpots,
+      selectedSpot,
+      onSelectSpot,
+      onUpdateNearbySpots,
+      mapRef,
+      searchedLocation,
+    },
+    ref
+  ) => {
+  const { user } = useAuth();
   const { isLoaded } = useJsApiLoader({
     id: 'google-map-script',
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY ?? '',
@@ -80,6 +92,7 @@ export default function SpotMap({
   const [nearbySpots, setNearbySpots] = useState<SpotWithDistance[]>([]);
   const [locationError, setLocationError] = useState<string | null>(null);
   const [reportModalSpot, setReportModalSpot] = useState<Spot | null>(null);
+  const [searchedLocationSelected, setSearchedLocationSelected] = useState(false);  // 検索地点マーカーの選択状態
 
   // 初期現在地取得
   useEffect(() => {
@@ -133,6 +146,13 @@ export default function SpotMap({
     onUpdateNearbySpots(nearby);
   }, [center, allSpots, onUpdateNearbySpots]);
 
+  // Parent から center を更新するための imperative API
+  useImperativeHandle(ref, () => ({
+    setCenterTo: (coords: LocationCoords) => {
+      setCenter(coords);
+    },
+  }), []);
+
   const onLoad = useCallback((map: google.maps.Map) => {
     internalRef.current = map;
     if (mapRef) mapRef.current = map;
@@ -141,7 +161,36 @@ export default function SpotMap({
       map.setCenter(center);
       map.setZoom(13);
     }
-  }, [center, mapRef]);
+  }, [mapRef]);
+
+  // center state が変わったら地図中心を更新（検索時などに center が更新されたら地図を移動）
+  useEffect(() => {
+    if (center && internalRef.current) {
+      // コンテナサイズ変更による表示領域のズレを解決（PC全画面対応）
+      google.maps.event.trigger(internalRef.current, 'resize');
+      // resize 後にスムーズに移動（setCenter ではなく panTo を使用）
+      internalRef.current.panTo(center);
+    }
+  }, [center]);
+
+  // 検索地点が更新されたら、自動でラベルを開く
+  useEffect(() => {
+    if (searchedLocation) {
+      setSearchedLocationSelected(true);
+    }
+  }, [searchedLocation]);
+
+  // ウィンドウリサイズ時に地図のリサイズを通知
+  useEffect(() => {
+    const handleWindowResize = () => {
+      if (internalRef.current) {
+        google.maps.event.trigger(internalRef.current, 'resize');
+      }
+    };
+
+    window.addEventListener('resize', handleWindowResize);
+    return () => window.removeEventListener('resize', handleWindowResize);
+  }, []);
 
   // 地図が止まったときに近いスポットを更新（onIdle）
   // setCenter は呼ばない（無限ループを防ぐため）。center は検索と現在地取得時だけ更新
@@ -243,6 +292,23 @@ export default function SpotMap({
           );
         })}
 
+        {/* 検索地点マーカー（目立つ青色・大きめサイズ） */}
+        {searchedLocation && (
+          <MarkerF
+            position={searchedLocation.coords}
+            onClick={() => setSearchedLocationSelected(!searchedLocationSelected)}
+            icon={{
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: 16,
+              fillColor: '#3b82f6',
+              fillOpacity: 0.9,
+              strokeColor: '#ffffff',
+              strokeWeight: 3,
+            }}
+            title={searchedLocation.query}
+          />
+        )}
+
         {/* InfoWindow */}
         {selectedSpot && (() => {
           const infoWindowOptions: google.maps.InfoWindowOptions = {};
@@ -255,18 +321,35 @@ export default function SpotMap({
               onCloseClick={() => onSelectSpot(null)}
               options={infoWindowOptions}
             >
-              <div className="max-w-[240px] p-2">
-                <p className="font-bold text-sm text-gray-900 mb-1">{selectedSpot.name}</p>
+              <div className="max-w-[240px] p-3" style={{ backgroundColor: '#FFFFFF' }}>
+                <p className="font-bold text-sm mb-1" style={{ color: '#1F2933' }}>{selectedSpot.name}</p>
                 {'address' in selectedSpot && (
-                  <p className="text-xs text-gray-500 mb-1">📍 {selectedSpot.address}</p>
+                  <p className="text-xs mb-1" style={{ color: '#52606D' }}>📍 {selectedSpot.address}</p>
                 )}
-                <p className="text-xs text-gray-500 mb-2">
+                <p className="text-xs mb-2" style={{ color: '#52606D' }}>
                   📏 {nearbySpots.find(s => s.name === selectedSpot.name)?.distance?.toFixed(1) || '?'}km
                 </p>
                 <div className="space-y-2">
+                  <a
+                    href={`/spots/${selectedSpot.id}`}
+                    className="block w-full py-2 text-center text-xs font-bold text-white transition-all hover:opacity-90"
+                    style={{
+                      backgroundColor: '#E8722C',
+                      borderRadius: '9px',
+                    }}
+                  >
+                    📋 詳細・レポート
+                  </a>
                   <button
                     onClick={() => setReportModalSpot(selectedSpot)}
-                    className="block w-full rounded-lg bg-blue-500 py-2 text-center text-xs font-bold text-white hover:bg-blue-600"
+                    className="block w-full py-2 text-center text-xs font-bold transition-all hover:opacity-90"
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      borderColor: '#D5D3CB',
+                      borderWidth: '1px',
+                      color: '#52606D',
+                      borderRadius: '9px',
+                    }}
                   >
                     📝 レポートを投稿
                   </button>
@@ -274,7 +357,11 @@ export default function SpotMap({
                     href={getMapsUrl(selectedSpot)}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full rounded-lg bg-orange-500 py-2 text-center text-xs font-bold text-white hover:bg-orange-600"
+                    className="block w-full py-2 text-center text-xs font-bold text-white transition-all hover:opacity-90"
+                    style={{
+                      backgroundColor: '#2196F3',
+                      borderRadius: '9px',
+                    }}
                   >
                     🗺 Google Mapsで開く
                   </a>
@@ -283,21 +370,49 @@ export default function SpotMap({
             </InfoWindowF>
           );
         })()}
+
+        {/* 検索地点の InfoWindow */}
+        {searchedLocation && searchedLocationSelected && (
+          <InfoWindowF
+            position={searchedLocation.coords}
+            onCloseClick={() => setSearchedLocationSelected(false)}
+          >
+            <div className="max-w-[240px] p-3" style={{ backgroundColor: '#FFFFFF' }}>
+              <p className="font-bold text-sm mb-2" style={{ color: '#1F2933' }}>🔍 検索した場所</p>
+              <p className="text-xs mb-3" style={{ color: '#52606D' }}>{searchedLocation.query}</p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(searchedLocation.query)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full py-2 text-center text-xs font-bold text-white transition-all hover:opacity-90"
+                style={{
+                  backgroundColor: '#2196F3',
+                  borderRadius: '9px',
+                }}
+              >
+                🗺 Google Mapsで開く
+              </a>
+            </div>
+          </InfoWindowF>
+        )}
       </GoogleMap>
       </div>
 
       {/* Report Modal */}
-      {reportModalSpot && (
-        <ReportModal
-          spotId={reportModalSpot.id}
-          spotName={reportModalSpot.name}
-          onClose={() => setReportModalSpot(null)}
-          onSuccess={() => {
-            setReportModalSpot(null);
-            // Optional: Refresh reports data here if needed
-          }}
-        />
-      )}
+      <ReportModal
+        spotId={reportModalSpot?.id || ''}
+        spotName={reportModalSpot?.name || ''}
+        isOpen={!!reportModalSpot}
+        onClose={() => setReportModalSpot(null)}
+        onSuccess={() => {
+          setReportModalSpot(null);
+          // Optional: Refresh reports data here if needed
+        }}
+      />
     </div>
   );
-}
+  }
+);
+
+SpotMapComponent.displayName = 'SpotMap';
+export default SpotMapComponent;

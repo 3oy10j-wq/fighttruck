@@ -168,7 +168,7 @@ export default function ReportsPage() {
               </div>
               {sortedReports.map((report) => (
                 <div key={report.id} className="space-y-2">
-                  <div className="text-xs text-gray-500 font-semibold px-2">
+                  <div className="text-xs text-gray-700 font-semibold px-2">
                     {getSpotName(report)}
                   </div>
                   <ReportCard report={report} compact={false} />

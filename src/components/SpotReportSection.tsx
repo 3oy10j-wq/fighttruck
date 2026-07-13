@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/hooks/useAuth';
 import ReportCard from '@/components/ReportCard';
-import { subscribeToSpotReports } from '@/lib/firebase/reports';
+import ReportModal from '@/components/ReportModal';
+import { subscribeToRecentReports, deleteUserReport } from '@/lib/firebase/reports';
 import type { Report, Spot } from '@/lib/types';
 
 interface SpotReportSectionProps {
@@ -11,29 +13,48 @@ interface SpotReportSectionProps {
 }
 
 export default function SpotReportSection({ spot }: SpotReportSectionProps) {
+  const { user } = useAuth();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
 
-    // Subscribe to real-time updates
-    const unsubscribe = subscribeToSpotReports(spot.id, (newReports) => {
-      setReports(newReports);
+    // Subscribe to all recent reports and filter by spot
+    // This handles both new format (michinoeki_609) and old format (michinoeki_609_柳津)
+    const unsubscribe = subscribeToRecentReports(200, (allReports) => {
+      // Filter reports by matching spot ID (exact match) or spot name
+      const filteredReports = allReports.filter((report) => {
+        // New format: exact match
+        if (report.spotId === spot.id) return true;
+
+        // Old format: prefix match for michinoeki data
+        if (spot.id.startsWith('michinoeki_')) {
+          if (report.spotId.startsWith(spot.id + '_')) return true;
+        }
+
+        // Also match by spotName if stored
+        if (report.spotName && spot.name && report.spotName === spot.name) return true;
+
+        return false;
+      });
+
+      setReports(filteredReports);
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setLoading(false);
     });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     return () => unsubscribe();
-  }, [spot.id]);
+  }, [spot.id, spot.name]);
 
   if (loading) {
     return (
       <div className="space-y-4 rounded-2xl border border-accent/20 bg-white p-6 shadow-sm">
-        <h2 className="font-serif text-lg font-bold text-ink">コミュニティレポート</h2>
-        <div className="text-center py-4 text-ink/60">読み込み中...</div>
+        <h2 className="font-serif text-lg font-bold text-gray-900">コミュニティレポート</h2>
+        <div className="text-center py-4 text-gray-600">読み込み中...</div>
       </div>
     );
   }
@@ -68,11 +89,11 @@ export default function SpotReportSection({ spot }: SpotReportSectionProps) {
   return (
     <div className="space-y-4 rounded-2xl border border-accent/20 bg-white p-6 shadow-sm">
       <div className="flex items-center justify-between">
-        <h2 className="font-serif text-lg font-bold text-ink">
+        <h2 className="font-serif text-lg font-bold text-gray-900">
           コミュニティレポート
         </h2>
         {reports.length > 0 && (
-          <span className="text-sm text-ink/60">
+          <span className="text-sm text-gray-600">
             {reports.length}件の報告
           </span>
         )}
@@ -80,54 +101,66 @@ export default function SpotReportSection({ spot }: SpotReportSectionProps) {
 
       {reports.length === 0 ? (
         <div className="text-center py-8">
-          <p className="text-ink/60 mb-4">
+          <p className="text-gray-600 mb-4">
             このスポットはまだレポートがありません
           </p>
-          <Link
-            href={`/spots/${spot.id}#report`}
-            className="text-sm text-accent hover:underline font-semibold"
+          <button
+            onClick={() => setIsReportModalOpen(true)}
+            className="text-sm text-accent hover:underline font-semibold cursor-pointer"
           >
             最初のレポートを投稿してみませんか？
-          </Link>
+          </button>
         </div>
       ) : (
         <>
           {/* Average Ratings */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-4 border-b border-accent/10">
             <div className="text-center">
-              <p className="text-xs text-ink/60 mb-1">駐車の容易さ</p>
+              <p className="text-xs text-gray-600 mb-1">駐車の容易さ</p>
               <p className="text-xl font-bold text-accent">{avgParkingEase}</p>
-              <p className="text-xs text-ink/40">/ 5.0</p>
+              <p className="text-xs text-gray-500">/ 5.0</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-ink/60 mb-1">清潔さ</p>
+              <p className="text-xs text-gray-600 mb-1">清潔さ</p>
               <p className="text-xl font-bold text-accent">{avgCleanliness}</p>
-              <p className="text-xs text-ink/40">/ 5.0</p>
+              <p className="text-xs text-gray-500">/ 5.0</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-ink/60 mb-1">総合満足度</p>
+              <p className="text-xs text-gray-600 mb-1">総合満足度</p>
               <p className="text-xl font-bold text-accent">
                 {avgOverallSatisfaction}
               </p>
-              <p className="text-xs text-ink/40">/ 5.0</p>
+              <p className="text-xs text-gray-500">/ 5.0</p>
             </div>
             <div className="text-center">
-              <p className="text-xs text-ink/60 mb-1">駐車可能</p>
+              <p className="text-xs text-gray-600 mb-1">駐車可能</p>
               <p className="text-xl font-bold text-green-600">
                 {canParkCount}/{reports.length}
               </p>
-              <p className="text-xs text-ink/40">台</p>
+              <p className="text-xs text-gray-500">台</p>
             </div>
           </div>
 
           {/* Recent Reports */}
           <div className="space-y-3">
-            <h3 className="font-semibold text-sm text-ink">最近のレポート</h3>
+            <h3 className="font-semibold text-sm text-gray-900">最近のレポート</h3>
             {reports.slice(0, 5).map((report) => (
               <ReportCard
                 key={report.id}
                 report={report}
                 compact={true}
+                canDelete={user?.uid === report.userId}
+                onDelete={async (reportId: string) => {
+                  if (!user) return;
+                  if (confirm('削除してもよろしいですか？')) {
+                    try {
+                      await deleteUserReport(reportId, user.uid);
+                      setReports(reports.filter((r) => r.id !== reportId));
+                    } catch (err) {
+                      alert('削除に失敗しました');
+                    }
+                  }
+                }}
               />
             ))}
           </div>
@@ -145,6 +178,18 @@ export default function SpotReportSection({ spot }: SpotReportSectionProps) {
           )}
         </>
       )}
+
+      {/* レポート投稿モーダル */}
+      <ReportModal
+        spotId={spot.id}
+        spotName={spot.name}
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        onSuccess={() => {
+          setIsReportModalOpen(false);
+          // モーダルを閉じたら、レポート一覧が自動更新される
+        }}
+      />
     </div>
   );
 }

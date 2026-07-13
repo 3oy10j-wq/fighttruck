@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '@/lib/hooks/useAuth';
 import { createReport, uploadReportImage } from '@/lib/firebase/reports';
 import StarRating from '@/components/StarRating';
@@ -10,6 +11,7 @@ interface ReportModalProps {
   spotName: string;
   onClose: () => void;
   onSuccess: () => void;
+  isOpen?: boolean;
 }
 
 export default function ReportModal({
@@ -17,6 +19,7 @@ export default function ReportModal({
   spotName,
   onClose,
   onSuccess,
+  isOpen = false,
 }: ReportModalProps) {
   const { user, profile } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -42,14 +45,16 @@ export default function ReportModal({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
 
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -126,13 +131,30 @@ export default function ReportModal({
   const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     // Only close if clicking on the backdrop itself, not the modal content
     if (e.target === e.currentTarget) {
+      // Hash をクリアして履歴を消す
+      if (typeof window !== 'undefined' && window.location.hash === '#report') {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
       onClose();
     }
   };
 
-  return (
+  const handleClose = () => {
+    // Hash をクリアして履歴を消す
+    if (typeof window !== 'undefined' && window.location.hash === '#report') {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search);
+    }
+    onClose();
+  };
+
+  // isOpen が false の場合は何も表示しない
+  if (!isOpen) {
+    return null;
+  }
+
+  const modalContent = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 pointer-events-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 pointer-events-auto"
       onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
@@ -145,7 +167,7 @@ export default function ReportModal({
           </h2>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="text-2xl text-gray-500 hover:text-gray-700 font-bold p-1"
             aria-label="閉じる"
           >
@@ -176,7 +198,7 @@ export default function ReportModal({
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
                 placeholder="匿名ドライバーで送信"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -240,7 +262,7 @@ export default function ReportModal({
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="このスポットについてのコメント..."
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
 
@@ -295,4 +317,6 @@ export default function ReportModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }

@@ -45,6 +45,8 @@ export interface Spot {
   region: RegionCode;
   type?: 'official_rest' | 'michinoeki';
   placeId?: string;
+  source?: 'official' | 'michinoeki' | 'user';  // ユーザー追加スポット判定
+  submissionId?: string;  // ユーザー申請のドキュメントID（source: "user"の場合）
   createdAt: Timestamp | null;
   updatedAt: Timestamp | null;
 }
@@ -65,4 +67,29 @@ export interface Report {
   comment: string;
   imageUrl: string;
   status: 'published';
+}
+
+export interface SpotSubmission {
+  id: string;
+  name: string;
+  type: 'convenience' | 'parking' | 'gas_station' | 'other';
+  lat: number;
+  lng: number;
+  can_park: 'yes' | 'maybe' | 'no';
+  comment: string;
+  imageUrl: string;
+  submitterName: string;
+  status: 'pending';
+  createdAt: Timestamp;
+}
+
+export interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  category: '不具合報告' | '機能要望' | 'その他';
+  message: string;
+  userId: string | null;
+  status: '未対応' | '対応中' | '対応済み';
+  createdAt: Timestamp;
 }

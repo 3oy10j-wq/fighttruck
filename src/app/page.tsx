@@ -1,200 +1,351 @@
+'use client';
+
 import Link from 'next/link';
-
-const STATS = [
-  { value: '21', label: 'スポット登録数', icon: '📍' },
-  { value: '100%', label: '公式データのみ', icon: '✅' },
-  { value: '24h', label: '対応スポットあり', icon: '🕐' },
-  { value: '無料', label: '完全無料で使える', icon: '🎁' },
-];
-
-const FEATURES = [
-  {
-    icon: '🗺️',
-    title: 'スポット検索',
-    desc: '地域・設備でかんたん絞り込み。見つけたらワンタップでGoogleマップ経路案内。',
-  },
-  {
-    icon: '✅',
-    title: '公式データのみ掲載',
-    desc: '国土交通省・日本トラック協会の公式データをもとに審査済みのスポットだけを掲載。',
-  },
-  {
-    icon: '📱',
-    title: 'ブラウザで使える',
-    desc: 'アプリのインストール不要。スマホ・タブレット・PCのブラウザからすぐに使えます。',
-  },
-];
+import Image from 'next/image';
+import { useAuth } from '@/lib/hooks/useAuth';
+import { Truck, CheckCircle, Users, Plus, Star, MapPin, MessageSquare, User } from 'lucide-react';
 
 export default function Home() {
+  const { user } = useAuth();
+
   return (
-    <div className="flex flex-col bg-[#0a0f1e]">
+    <div className="flex flex-col bg-white">
+      {/* ── ヒーローセクション ── */}
+      <section className="relative w-full overflow-hidden px-4 py-20 md:py-32">
+        {/* ヒーロー背景画像 */}
+        <div className="absolute inset-0">
+          <Image
+            src="/hero.jpg"
+            alt="トラックドライバー向け休憩スポット"
+            fill
+            className="object-cover object-center md:object-[center_35%]"
+            priority
+            quality={85}
+          />
+        </div>
 
-      {/* ── ヒーロー ── */}
-      <section className="relative overflow-hidden px-4 py-20 md:py-32">
-        {/* グリッド背景 */}
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.06]"
-          style={{
-            backgroundImage:
-              'linear-gradient(#f97316 1px,transparent 1px),linear-gradient(90deg,#f97316 1px,transparent 1px)',
-            backgroundSize: '48px 48px',
-          }}
-        />
-        {/* オレンジグロー */}
-        <div className="pointer-events-none absolute -top-32 right-0 h-[500px] w-[500px] rounded-full bg-[#f97316]/10 blur-[120px]" />
+        {/* オーバーレイ */}
+        <div className="absolute inset-0 bg-black/45" />
 
-        <div className="relative mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-
-          {/* 左：テキスト */}
-          <div className="space-y-8">
-            <div className="inline-flex items-center gap-2 rounded-full border border-[#f97316]/30 bg-[#f97316]/10 px-4 py-1.5 text-xs font-semibold text-[#f97316]">
-              🚛 トラックドライバー専用サービス
+        <div className="relative mx-auto max-w-5xl">
+          <div className="space-y-6 text-center md:space-y-8">
+            {/* 小ラベル */}
+            <div className="inline-block" style={{ color: '#F5C26B' }}>
+              <span className="text-xs font-bold tracking-widest md:text-sm">
+                トラックドライバーのための休憩スポット検索サイト
+              </span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-[1.2] tracking-tight text-white md:text-5xl">
-              全国のトラックドライバーに。<br />
-              <span className="text-[#f97316]">休憩スポットを、</span><br />
-              もっと簡単に。
+            {/* キャッチコピー */}
+            <h1 className="text-4xl font-bold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
+              あなたの休憩が、<br />
+              誰かの明日を運ぶ。
             </h1>
 
-            <p className="text-base leading-relaxed text-[#94a3b8] md:text-lg">
-              国土交通省・日本トラック協会の公式データのみ掲載。<br />
-              安心して使える休憩スポット検索サービス。
+            {/* サブコピー */}
+            <p className="mx-auto max-w-2xl text-lg text-gray-100 leading-relaxed md:text-xl">
+              大型トラックOK・24時間・シャワーの有無まで。全国1,150件以上から、今すぐ停められる場所が見つかる。
             </p>
 
-            <div className="flex flex-col gap-3 sm:flex-row">
+            {/* CTA ボタン */}
+            <div className="flex justify-center pt-4">
               <Link
                 href="/spots"
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl bg-[#f97316] px-8 text-base font-bold text-white transition-all hover:scale-105 hover:bg-[#ea6d0e] hover:shadow-xl hover:shadow-orange-500/30"
+                className="inline-flex items-center justify-center rounded-full px-8 py-3 text-base font-bold text-white transition-all hover:scale-105 active:scale-95"
+                style={{ backgroundColor: '#E8722C' }}
               >
-                スポットを探す →
+                近くのスポットを探す
               </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 数字セクション ── */}
+      <section id="stats" className="w-full px-4 py-20 md:py-28" style={{ backgroundColor: '#FFFFFF' }}>
+        <div className="mx-auto max-w-5xl">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {/* 統計1 */}
+            <div className="text-center">
+              <p className="mb-2 text-5xl font-bold md:text-6xl" style={{ color: '#E8722C' }}>
+                1,150
+              </p>
+              <p className="text-lg font-semibold" style={{ color: '#1F2933' }}>
+                件以上のスポット
+              </p>
+              <p className="text-sm" style={{ color: '#52606D' }}>
+                収録スポット数
+              </p>
+            </div>
+
+            {/* 統計2 */}
+            <div className="text-center">
+              <p className="mb-2 text-5xl font-bold md:text-6xl" style={{ color: '#E8722C' }}>
+                47
+              </p>
+              <p className="text-lg font-semibold" style={{ color: '#1F2933' }}>
+                都道府県
+              </p>
+              <p className="text-sm" style={{ color: '#52606D' }}>
+                全国カバー
+              </p>
+            </div>
+
+            {/* 統計3 */}
+            <div className="text-center">
+              <p className="mb-2 text-5xl font-bold md:text-6xl" style={{ color: '#E8722C' }}>
+                0
+              </p>
+              <p className="text-lg font-semibold" style={{ color: '#1F2933' }}>
+                円
+              </p>
+              <p className="text-sm" style={{ color: '#52606D' }}>
+                ずっと無料
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 特徴セクション ── */}
+      <section className="w-full px-4 py-20 md:py-28" style={{ backgroundColor: '#FAF9F6' }}>
+        <div className="mx-auto max-w-5xl">
+          {/* セクション見出し */}
+          <div className="mb-16 text-center md:mb-20">
+            <h2 className="text-3xl font-bold md:text-4xl" style={{ color: '#1F2933' }}>
+              走るプロのための、3つの安心
+            </h2>
+          </div>
+
+          {/* カード3枚 */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+            {/* カード1 */}
+            <div
+              className="rounded-xl border p-8 transition-all hover:shadow-lg"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+            >
+              <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                <Truck className="h-6 w-6" style={{ color: '#E8722C' }} />
+              </div>
+              <h3 className="mb-3 text-xl font-bold" style={{ color: '#1F2933' }}>
+                大型トラックでも、余裕で停められる
+              </h3>
+              <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                駐車スペースの広さ・大型可否を事前にチェック。「行ってみたら停められなかった」をなくします。
+              </p>
+            </div>
+
+            {/* カード2 */}
+            <div
+              className="rounded-xl border p-8 transition-all hover:shadow-lg"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+            >
+              <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                <CheckCircle className="h-6 w-6" style={{ color: '#E8722C' }} />
+              </div>
+              <h3 className="mb-3 text-xl font-bold" style={{ color: '#1F2933' }}>
+                運営が確認した正しい情報
+              </h3>
+              <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                ユーザー投稿のスポットは運営が確認してから掲載。「運営確認済み」バッジが目印。
+              </p>
+            </div>
+
+            {/* カード3 */}
+            <div
+              className="rounded-xl border p-8 transition-all hover:shadow-lg"
+              style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+            >
+              <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                <Users className="h-6 w-6" style={{ color: '#E8722C' }} />
+              </div>
+              <h3 className="mb-3 text-xl font-bold" style={{ color: '#1F2933' }}>
+                ドライバー同士で情報交換
+              </h3>
+              <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                「今日は満車だった」「シャワーがきれい」——現場のリアルな報告が集まる。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 投稿呼びかけセクション ── */}
+      <section className="w-full px-4 py-20 md:py-28" style={{ backgroundColor: '#FFF3E9' }}>
+        <div className="mx-auto max-w-3xl text-center">
+          {/* 丸アイコン */}
+          <div className="mb-6 flex justify-center">
+            <div
+              className="flex items-center justify-center rounded-full p-4"
+              style={{ backgroundColor: '#E8722C' }}
+            >
+              <Plus className="h-8 w-8 text-white" />
+            </div>
+          </div>
+
+          {/* 見出し */}
+          <h2 className="mb-6 text-3xl font-bold md:text-4xl" style={{ color: '#1F2933' }}>
+            あなたの「いつもの場所」が、誰かを助ける。
+          </h2>
+
+          {/* 本文 */}
+          <p className="mb-8 text-lg leading-relaxed" style={{ color: '#52606D' }}>
+            「ここ、意外と停められるんだよな」——
+            <br className="hidden sm:inline" />
+            そんなあなただけが知っている休憩スポットを、ぜひ教えてください。
+            <br className="hidden sm:inline" />
+            あなたの投稿が、全国のドライバーの助けになります。
+          </p>
+
+          {/* ボタン */}
+          <Link
+            href="/spots"
+            className="inline-flex items-center justify-center rounded-full px-10 py-4 text-base font-bold text-white transition-all hover:scale-105 active:scale-95"
+            style={{ backgroundColor: '#E8722C' }}
+          >
+            休憩スポットを投稿する
+          </Link>
+        </div>
+      </section>
+
+      {/* ── 会員登録のメリット ── */}
+      {!user && (
+        <section className="w-full px-4 py-20 md:py-28" style={{ backgroundColor: '#FFFFFF' }}>
+          <div className="mx-auto max-w-5xl">
+            {/* ラベル */}
+            <div className="mb-6 text-center" style={{ color: '#E8722C', letterSpacing: '0.14em' }}>
+              <span className="text-sm font-bold tracking-widest">FREE MEMBERSHIP</span>
+            </div>
+
+            {/* 見出し */}
+            <h2 className="mb-4 text-center text-2xl font-bold md:text-3xl" style={{ color: '#1F2933' }}>
+              登録しなくても使えます。でも、登録するともっと便利に。
+            </h2>
+
+            {/* サブテキスト */}
+            <p className="mx-auto mb-12 max-w-2xl text-center text-base leading-relaxed" style={{ color: '#52606D' }}>
+              スポット検索は登録なしで誰でも利用OK。
+              <br />
+              無料の会員登録をすると、次のことができるようになります。
+            </p>
+
+            {/* メリットカード 4つ */}
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-12">
+              {/* カード1: お気に入り登録 */}
+              <div
+                className="rounded-xl border p-8"
+                style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+              >
+                <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                  <Star className="h-6 w-6" style={{ color: '#E8722C' }} />
+                </div>
+                <h3 className="mb-3 text-lg font-bold" style={{ color: '#1F2933' }}>
+                  ★ お気に入り登録
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                  よく使うスポットを保存して、マイページからすぐアクセス。
+                </p>
+              </div>
+
+              {/* カード2: スポットの投稿 */}
+              <div
+                className="rounded-xl border p-8"
+                style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+              >
+                <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                  <MapPin className="h-6 w-6" style={{ color: '#E8722C' }} />
+                </div>
+                <h3 className="mb-3 text-lg font-bold" style={{ color: '#1F2933' }}>
+                  📍 スポットの投稿
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                  あなたの知っている休憩場所を共有。全国のドライバーの助けに。
+                </p>
+              </div>
+
+              {/* カード3: リアルタイム報告 */}
+              <div
+                className="rounded-xl border p-8"
+                style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+              >
+                <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                  <MessageSquare className="h-6 w-6" style={{ color: '#E8722C' }} />
+                </div>
+                <h3 className="mb-3 text-lg font-bold" style={{ color: '#1F2933' }}>
+                  📝 リアルタイム報告
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                  「今日は満車」「シャワーがきれい」——現場の情報をみんなに届ける。
+                </p>
+              </div>
+
+              {/* カード4: マイページ */}
+              <div
+                className="rounded-xl border p-8"
+                style={{ backgroundColor: '#FFFFFF', borderColor: '#E5E3DC' }}
+              >
+                <div className="mb-4 inline-flex rounded-2xl p-3" style={{ backgroundColor: '#FFF3E9' }}>
+                  <User className="h-6 w-6" style={{ color: '#E8722C' }} />
+                </div>
+                <h3 className="mb-3 text-lg font-bold" style={{ color: '#1F2933' }}>
+                  👤 マイページ
+                </h3>
+                <p className="text-base leading-relaxed" style={{ color: '#52606D' }}>
+                  自分の投稿・お気に入りをまとめて管理。ファイトラック歴も表示。
+                </p>
+              </div>
+            </div>
+
+            {/* CTA ボタン */}
+            <div className="text-center">
               <Link
                 href="/register"
-                className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-xl border border-white/25 px-8 text-base font-medium text-white transition-all hover:border-white/50 hover:bg-white/10"
+                className="inline-flex items-center justify-center rounded-full px-10 py-4 text-base font-bold text-white transition-all hover:scale-105 active:scale-95 mb-4"
+                style={{ backgroundColor: '#E8722C' }}
               >
-                無料登録する
+                無料で会員登録する
               </Link>
+              <p className="text-sm" style={{ color: '#7B8794' }}>
+                登録は30秒。ずっと無料です。
+              </p>
             </div>
           </div>
+        </section>
+      )}
 
-          {/* 右：スマホモックアップSVG */}
-          <div className="flex justify-center lg:justify-end">
-            <svg viewBox="0 0 280 520" className="w-48 drop-shadow-2xl md:w-64" xmlns="http://www.w3.org/2000/svg">
-              {/* 本体 */}
-              <rect x="10" y="10" width="260" height="500" rx="32" fill="#111827" stroke="#334155" strokeWidth="2"/>
-              <rect x="10" y="10" width="260" height="500" rx="32" fill="url(#phoneGrad)"/>
-              <defs>
-                <linearGradient id="phoneGrad" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0%" stopColor="#1e293b"/>
-                  <stop offset="100%" stopColor="#0f172a"/>
-                </linearGradient>
-              </defs>
-              {/* ノッチ */}
-              <rect x="100" y="18" width="80" height="14" rx="7" fill="#0f172a"/>
-              {/* 地図エリア */}
-              <rect x="22" y="45" width="236" height="300" rx="8" fill="#1e3a5f"/>
-              {/* 道路 */}
-              <line x1="22" y1="195" x2="258" y2="195" stroke="#334155" strokeWidth="8"/>
-              <line x1="140" y1="45" x2="140" y2="345" stroke="#334155" strokeWidth="8"/>
-              {/* ピン1 */}
-              <ellipse cx="140" cy="175" rx="18" ry="6" fill="#f97316" opacity="0.3"/>
-              <circle cx="140" cy="155" r="16" fill="#f97316"/>
-              <circle cx="140" cy="155" r="8" fill="white"/>
-              <polygon points="140,178 130,162 150,162" fill="#f97316"/>
-              {/* ピン2（小） */}
-              <circle cx="90" cy="110" r="10" fill="#3b82f6"/>
-              <circle cx="90" cy="110" r="5" fill="white"/>
-              <polygon points="90,126 83,116 97,116" fill="#3b82f6"/>
-              {/* ピン3（小） */}
-              <circle cx="200" cy="250" r="10" fill="#3b82f6"/>
-              <circle cx="200" cy="250" r="5" fill="white"/>
-              <polygon points="200,266 193,256 207,256" fill="#3b82f6"/>
-              {/* カードパネル */}
-              <rect x="22" y="355" width="236" height="130" rx="10" fill="#1e293b"/>
-              <text x="38" y="380" fill="white" fontSize="11" fontWeight="bold" fontFamily="sans-serif">道の駅 まし子</text>
-              <text x="38" y="396" fill="#94a3b8" fontSize="9" fontFamily="sans-serif">栃木県芳賀郡益子町</text>
-              {/* 設備バッジ */}
-              <rect x="38" y="406" width="36" height="14" rx="7" fill="#f97316" opacity="0.2"/>
-              <text x="46" y="416" fill="#f97316" fontSize="8" fontFamily="sans-serif">🅿️ 駐車場</text>
-              <rect x="80" y="406" width="30" height="14" rx="7" fill="#3b82f6" opacity="0.2"/>
-              <text x="87" y="416" fill="#93c5fd" fontSize="8" fontFamily="sans-serif">🍜 食堂</text>
-              {/* ナビボタン */}
-              <rect x="38" y="428" width="200" height="36" rx="10" fill="#f97316"/>
-              <text x="138" y="451" fill="white" fontSize="12" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">🗺 経路案内</text>
-              {/* ホームバー */}
-              <rect x="110" y="500" width="60" height="4" rx="2" fill="#475569"/>
-            </svg>
-          </div>
-        </div>
-      </section>
-
-      {/* ── 統計バー ── */}
-      <section className="border-y border-white/10 bg-[#111827] px-4 py-10">
-        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-6 text-center md:grid-cols-4">
-          {STATS.map(({ value, label, icon }) => (
-            <div key={label} className="space-y-1">
-              <div className="text-2xl">{icon}</div>
-              <p className="text-3xl font-extrabold text-[#f97316]">{value}</p>
-              <p className="text-xs text-[#94a3b8]">{label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── 機能カード ── */}
-      <section className="px-4 py-20">
-        <div className="mx-auto max-w-5xl">
-          <div className="mb-12 text-center space-y-3">
-            <h2 className="text-3xl font-bold text-white md:text-4xl">
-              ドライバーが<span className="text-[#f97316]">本当に必要な</span>機能だけ
-            </h2>
-            <p className="text-[#94a3b8]">余分な機能は作らない。現場で使いやすいことを最優先に。</p>
+      {/* ── OUR STORY セクション ── */}
+      <section
+        className="w-full border-t px-4 py-20 md:py-28"
+        style={{ borderColor: '#EEECE5', backgroundColor: '#FFFFFF' }}
+      >
+        <div className="mx-auto max-w-3xl text-center">
+          {/* ラベル */}
+          <div className="mb-6" style={{ color: '#E8722C', letterSpacing: '0.14em' }}>
+            <span className="text-sm font-bold tracking-widest">OUR STORY</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-            {FEATURES.map(({ icon, title, desc }) => (
-              <div
-                key={title}
-                className="group rounded-2xl border border-white/10 bg-[#111827] p-7 transition-all duration-300 hover:border-[#f97316]/40 hover:shadow-xl hover:shadow-orange-500/10"
-              >
-                <div className="mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#f97316]/10 text-3xl transition-transform duration-300 group-hover:scale-110">
-                  {icon}
-                </div>
-                <h3 className="mb-3 text-xl font-bold text-white">{title}</h3>
-                <p className="text-sm leading-relaxed text-[#94a3b8]">{desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── CTA ── */}
-      <section className="border-t border-white/10 bg-[#111827] px-4 py-20">
-        <div className="mx-auto max-w-2xl text-center space-y-6">
-          <h2 className="text-3xl font-bold text-white md:text-4xl">
-            今すぐ無料で始めよう
-          </h2>
-          <p className="text-[#94a3b8]">
-            登録はメールアドレスだけ。1分で完了します。
+          {/* 本文 */}
+          <p
+            className="text-lg leading-loose"
+            style={{ color: '#1F2933', lineHeight: '2.0' }}
+          >
+            作ったのは、トラックを愛するいちファンです。
+            <br />
+            「今日はどこで休もう」——その悩みに、日本中のドライバーが
+            <br />
+            毎日向き合っていることを知りました。
+            <br />
+            日本の物流を支えるプロたちが、安心して休める場所を
+            <br />
+            すぐに見つけられるように。その一心で、このサービスを作っています。
           </p>
-          <div className="flex flex-col gap-4 sm:flex-row sm:justify-center">
-            <Link
-              href="/register"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-xl bg-[#f97316] px-10 text-base font-bold text-white transition-all hover:scale-105 hover:bg-[#ea6d0e] hover:shadow-xl hover:shadow-orange-500/30"
-            >
-              無料で始める →
-            </Link>
-            <Link
-              href="/spots"
-              className="inline-flex min-h-[52px] items-center justify-center rounded-xl border border-white/25 px-10 text-base font-medium text-white transition-all hover:bg-white/10"
-            >
-              まずスポットを見る
-            </Link>
-          </div>
+
+          {/* 署名 */}
+          <p className="mt-8 text-sm" style={{ color: '#7B8794' }}>
+            — ファイトラック運営事務局
+          </p>
         </div>
       </section>
-
     </div>
   );
 }
