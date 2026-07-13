@@ -1,10 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+export const dynamic = 'force-dynamic';
+
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripe) return stripe;
+
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+
+  stripe = new Stripe(secretKey);
+  return stripe;
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured' },
+        { status: 503 }
+      );
+    }
+
     const { userId, email } = await request.json();
 
     if (!userId || !email) {
@@ -15,7 +37,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create Checkout Session
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer_email: email,
       client_reference_id: userId,
       line_items: [

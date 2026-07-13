@@ -5,8 +5,25 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (stripe) return stripe;
+  const secretKey = process.env.STRIPE_SECRET_KEY;
+  if (!secretKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+  stripe = new Stripe(secretKey);
+  return stripe;
+}
+
+function getWebhookSecret(): string {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET;
+  if (!secret) {
+    throw new Error('STRIPE_WEBHOOK_SECRET environment variable is not set');
+  }
+  return secret;
+}
 
 // Firebase Admin SDK 初期化（遅延初期化）
 let db: any = null;
@@ -43,6 +60,14 @@ function getFirebaseDb() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Stripe is configured
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+      return NextResponse.json(
+        { error: 'Stripe is not configured' },
+        { status: 503 }
+      );
+    }
+
     const body = await request.text();
     const signature = request.headers.get('stripe-signature');
 
@@ -55,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     let event: Stripe.Event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      event = getStripe().webhooks.constructEvent(body, signature, getWebhookSecret());
     } catch (error) {
       console.error('❌ Webhook signature verification failed:', error);
       return NextResponse.json(
@@ -78,7 +103,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Retrieve full subscription details
-      const subscription = await stripe.subscriptions.retrieve(
+      const subscription = await getStripe().subscriptions.retrieve(
         session.subscription as string
       );
 
