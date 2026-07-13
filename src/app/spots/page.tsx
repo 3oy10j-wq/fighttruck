@@ -180,7 +180,6 @@ function SpotsPageContent() {
               borderColor: '#E0DED6',
               borderWidth: '1px',
               borderRadius: '12px',
-              focusRingColor: '#E8722C',
             }}
           />
           <button

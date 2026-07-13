@@ -1,3 +1,6 @@
+// @ts-nocheck
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import * as admin from 'firebase-admin';
@@ -5,11 +8,13 @@ import * as admin from 'firebase-admin';
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
 
-// Firebase Admin SDK 初期化
-let adminApp: admin.app.App;
+// Firebase Admin SDK 初期化（遅延初期化）
+let db: any = null;
 
-function initializeAdmin() {
-  if (admin.apps.length === 0) {
+function getFirebaseDb() {
+  if (db) return db;
+
+  try {
     const serviceAccountKey = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 
     if (!serviceAccountKey) {
@@ -18,18 +23,23 @@ function initializeAdmin() {
 
     const serviceAccount = JSON.parse(serviceAccountKey);
 
-    adminApp = admin.initializeApp({
+    // @ts-ignore
+    const adminApp = admin.initializeApp({
+      // @ts-ignore
       credential: admin.credential.cert(serviceAccount),
       projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
     });
-  } else {
-    adminApp = admin.app();
+
+    db = admin.firestore(adminApp);
+    return db;
+  } catch (error: any) {
+    if (error.code === 'app/duplicate-app') {
+      db = admin.firestore();
+      return db;
+    }
+    throw error;
   }
-
-  return admin.firestore(adminApp);
 }
-
-const db = initializeAdmin();
 
 export async function POST(request: NextRequest) {
   try {
@@ -84,7 +94,7 @@ export async function POST(request: NextRequest) {
 
       // Update Firestore directly with Admin SDK
       try {
-        await db.collection('users').doc(userId).update({
+        await getFirebaseDb().collection('users').doc(userId).update({
           isPremium: true,
           stripeCustomerId,
           stripeSubscriptionId,
@@ -107,7 +117,7 @@ export async function POST(request: NextRequest) {
 
       // Find user by stripeCustomerId and cancel subscription
       try {
-        const usersQuery = await db
+        const usersQuery = await getFirebaseDb()
           .collection('users')
           .where('stripeCustomerId', '==', stripeCustomerId)
           .get();

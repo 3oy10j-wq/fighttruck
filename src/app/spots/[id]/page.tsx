@@ -7,7 +7,7 @@ import { getSpotById } from '@/lib/firebase/spots';
 import { FACILITY_LABELS, REGION_LABELS } from '@/lib/constants';
 import SpotReportSection from '@/components/SpotReportSection';
 import FavoriteButton from '@/components/FavoriteButton';
-import type { SpotFacilities } from '@/lib/types';
+import type { SpotFacilities, Spot } from '@/lib/types';
 
 const FACILITY_KEYS = Object.keys(FACILITY_LABELS) as (keyof SpotFacilities)[];
 
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function SpotDetailPage({ params }: Props) {
   const { id } = await params;
 
-  let spot: (typeof import('@/lib/types').Spot) | null = null;
+  let spot: Spot | null = null;
 
   // Check if id is from michinoeki data
   if (id.startsWith('michinoeki_')) {
@@ -53,7 +53,7 @@ export default async function SpotDetailPage({ params }: Props) {
         spot = {
           id,
           ...michinoekiSpot,
-        } as typeof import('@/lib/types').Spot;
+        } as Spot;
       }
     } catch (error) {
       console.error('Failed to load michinoeki data:', error);
@@ -155,13 +155,19 @@ export default async function SpotDetailPage({ params }: Props) {
           <div className="space-y-4 rounded-2xl border border-accent/20 bg-white p-6 shadow-sm">
             <h2 className="font-serif text-lg font-bold text-gray-900">申請情報</h2>
             <dl className="space-y-3 text-sm">
-              {spot.type && (
+              {(spot as any).type && (
                 <div className="flex gap-4">
                   <dt className="w-24 shrink-0 font-medium text-gray-700">タイプ</dt>
                   <dd className="text-gray-900">
-                    {spot.type === 'user_submitted'
-                      ? 'ユーザー申請スポット'
-                      : spot.type}
+                    {(spot as any).type === 'convenience'
+                      ? 'コンビニ'
+                      : (spot as any).type === 'parking'
+                      ? '駐車場'
+                      : (spot as any).type === 'gas_station'
+                      ? 'ガソリンスタンド'
+                      : (spot as any).type === 'other'
+                      ? 'その他'
+                      : (spot as any).type}
                   </dd>
                 </div>
               )}

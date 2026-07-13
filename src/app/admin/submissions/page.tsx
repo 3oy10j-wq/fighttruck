@@ -17,8 +17,8 @@ interface ApprovedSpot extends Spot {
 
 interface EditingSubmission {
   name: string;
-  type: string;
-  can_park: string;
+  type: 'convenience' | 'parking' | 'gas_station' | 'other';
+  can_park: 'yes' | 'maybe' | 'no';
   comment: string;
 }
 
@@ -295,7 +295,7 @@ export default function SubmissionsPage() {
                         <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">タイプ</label>
                         <select
                           value={editData.type}
-                          onChange={(e) => setEditData({ ...editData, type: e.target.value })}
+                          onChange={(e) => setEditData({ ...editData, type: e.target.value as 'convenience' | 'parking' | 'gas_station' | 'other' })}
                           className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black bg-white font-semibold"
                         >
                           <option value="convenience">コンビニ</option>
@@ -309,7 +309,7 @@ export default function SubmissionsPage() {
                         <label className="block text-sm sm:text-base font-medium text-gray-700 mb-2">大型トラック対応</label>
                         <select
                           value={editData.can_park}
-                          onChange={(e) => setEditData({ ...editData, can_park: e.target.value })}
+                          onChange={(e) => setEditData({ ...editData, can_park: e.target.value as 'yes' | 'maybe' | 'no' })}
                           className="w-full px-4 py-3 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-black bg-white font-semibold"
                         >
                           <option value="yes">✓ 停められた</option>

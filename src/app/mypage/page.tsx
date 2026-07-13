@@ -8,6 +8,7 @@ import { getUserReports, deleteUserReport, updateUserReport } from '@/lib/fireba
 import { getUserPremiumInfo } from '@/lib/firebase/subscription-management';
 import { MessageCircle, Edit2, Trash2, ArrowLeft, Heart } from 'lucide-react';
 import { getFirebaseDb } from '@/lib/firebase/config';
+import type { FavoriteSpot } from '@/lib/firebase/favorites';
 import { doc, updateDoc, collection, getDocs, query, where, getDoc, documentId } from 'firebase/firestore';
 import { getSpots } from '@/lib/firebase/spots';
 import { isFavorited } from '@/lib/firebase/favorites';
@@ -73,7 +74,7 @@ export default function MypagePage() {
         const favoritesRef = collection(db, 'users', user.uid, 'favorites');
         const favoritesSnap = await getDocs(favoritesRef);
         const favoriteDocs = favoritesSnap.docs.map(doc => ({
-          ...doc.data(),
+          ...(doc.data() as FavoriteSpot),
           docId: doc.id,
         }));
 
@@ -544,7 +545,7 @@ export default function MypagePage() {
                         {report.spotName}
                       </Link>
                       <p className="text-xs mb-4" style={{ color: '#7B8794' }}>
-                        {new Date(report.timestamp).toLocaleDateString('ja-JP')}
+                        {report.timestamp.toDate().toLocaleDateString('ja-JP')}
                       </p>
 
                       <div className="mb-4">
