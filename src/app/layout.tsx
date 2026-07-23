@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Noto_Serif_JP, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
@@ -55,6 +56,19 @@ export default function RootLayout({
       lang="ja"
       className={`${notoSerifJP.variable} ${notoSansJP.variable} h-full`}
     >
+      <head>
+        {/* Google Analytics 4 */}
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-CCS3S6H58Y"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-CCS3S6H58Y');`}
+        </Script>
+      </head>
       <body className="min-h-full flex flex-col font-sans antialiased">
         <Header />
         <main className="flex-1">
