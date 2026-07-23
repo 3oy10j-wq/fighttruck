@@ -252,7 +252,7 @@ function SpotsPageContent() {
       </div>
 
       {/* モバイル: タブ切り替え */}
-      <div className="md:hidden flex flex-col" style={{ height: 'calc(100vh - 18rem)' }}>
+      <div className="md:hidden flex flex-col min-h-screen">
         <div className="flex" style={{ backgroundColor: '#FFFFFF', borderBottomColor: '#E5E3DC', borderBottomWidth: '1px' }}>
           <button
             onClick={() => setMobileTab('list')}
@@ -284,9 +284,9 @@ function SpotsPageContent() {
           </button>
         </div>
 
-        <div className="flex-1 overflow-hidden" style={{ backgroundColor: '#FFFFFF' }}>
+        <div style={{ backgroundColor: '#FFFFFF' }}>
           {mobileTab === 'list' ? (
-            <div className="overflow-y-auto p-4">
+            <div className="p-4">
               {loading ? (
                 <p className="text-center" style={{ color: '#52606D' }}>読み込み中...</p>
               ) : nearbySpots.length === 0 ? (
