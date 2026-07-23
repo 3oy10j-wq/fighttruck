@@ -59,43 +59,31 @@ export function getCurrentLocation(): Promise<LocationCoords> {
   });
 }
 
-// アドレスを座標に変換（Geocoding API）- 精度向上版
+// アドレスを座標に変換（API Route 経由で Geocoding API を呼び出し）
 export async function geocodeAddress(address: string): Promise<LocationCoords | null> {
   try {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    if (!apiKey) {
-      console.error('❌ API キーが設定されていません');
+    console.log('📍 ジオコード開始:', address);
+
+    // API Route に POST リクエストを送信
+    const response = await fetch('/api/geocode', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ address }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.warn('⚠️ ジオコード失敗:', response.status, errorData);
       return null;
     }
 
-    // 日本の主要都市の場合、駅を追加して精度を向上
-    let searchQuery = address;
-    const majorCities = ['東京', '大阪', '名古屋', '京都', '横浜', '福岡', '札幌', '広島', '神戸', '仙台'];
-    if (majorCities.some(city => address.includes(city)) && !address.includes('駅')) {
-      searchQuery = `${address}駅`;
-    }
-
-    const encodedAddress = encodeURIComponent(searchQuery);
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&region=JP&key=${apiKey}`;
-
-    const response = await fetch(url);
-    console.log('📍 HTTP レスポンスステータス:', response.status, response.statusText);
     const data = await response.json();
-    console.log('📍 Google Geocoding API レスポンス全体:', data);
-
-    if (data.status === 'OK' && data.results?.[0]) {
-      const location = data.results[0].geometry.location;
-      return { lat: location.lat, lng: location.lng };
-    }
-
-    console.warn('⚠️ ジオコード失敗:', data.status, '検索:', searchQuery);
-    if (data.error_message) {
-      console.error('❌ API エラーメッセージ:', data.error_message);
-    }
-    return null;
+    console.log('✓ ジオコード成功:', address, data);
+    return data as LocationCoords;
   } catch (err) {
     console.error('❌ geocodeAddress エラー:', err);
-    console.error('❌ エラー詳細:', JSON.stringify(err, null, 2));
     return null;
   }
 }
