@@ -79,7 +79,9 @@ export async function geocodeAddress(address: string): Promise<LocationCoords | 
     const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodedAddress}&region=JP&key=${apiKey}`;
 
     const response = await fetch(url);
+    console.log('📍 HTTP レスポンスステータス:', response.status, response.statusText);
     const data = await response.json();
+    console.log('📍 Google Geocoding API レスポンス全体:', data);
 
     if (data.status === 'OK' && data.results?.[0]) {
       const location = data.results[0].geometry.location;
@@ -87,13 +89,13 @@ export async function geocodeAddress(address: string): Promise<LocationCoords | 
     }
 
     console.warn('⚠️ ジオコード失敗:', data.status, '検索:', searchQuery);
-    console.log('📍 Google Geocoding API レスポンス全体:', data);
     if (data.error_message) {
-      console.error('❌ エラーメッセージ:', data.error_message);
+      console.error('❌ API エラーメッセージ:', data.error_message);
     }
     return null;
   } catch (err) {
     console.error('❌ geocodeAddress エラー:', err);
+    console.error('❌ エラー詳細:', JSON.stringify(err, null, 2));
     return null;
   }
 }
