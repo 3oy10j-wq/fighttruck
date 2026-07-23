@@ -87,6 +87,10 @@ export async function geocodeAddress(address: string): Promise<LocationCoords | 
     }
 
     console.warn('⚠️ ジオコード失敗:', data.status, '検索:', searchQuery);
+    console.log('📍 Google Geocoding API レスポンス全体:', data);
+    if (data.error_message) {
+      console.error('❌ エラーメッセージ:', data.error_message);
+    }
     return null;
   } catch (err) {
     console.error('❌ geocodeAddress エラー:', err);
