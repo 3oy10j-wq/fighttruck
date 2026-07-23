@@ -42,7 +42,7 @@ export const metadata: Metadata = {
     images: ['/og-image.png'],
   },
   verification: {
-    google: 'PNauj_CgeMQugQLenjminjFcYRhgzmLvJKXBea-9zR4',
+    google: '_OjaEherMffFm7WOt8M4WaLrFiW_HPn42IHC5Kzhwuo',
   },
 };
 
