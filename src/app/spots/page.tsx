@@ -167,7 +167,7 @@ function SpotsPageContent() {
     <>
       {/* 検索バー + 追加ボタン */}
       <div className="sticky top-16 z-10 px-4 py-3 shadow-sm" style={{ backgroundColor: '#FAF9F6', borderBottomColor: '#EEECE5', borderBottomWidth: '1px' }}>
-        <div className="max-w-3xl mx-auto flex gap-2 mb-2">
+        <div className="max-w-3xl mx-auto flex flex-col md:flex-row gap-3 md:gap-2 mb-2">
           <input
             type="text"
             placeholder="地名や住所で検索... 例）渋谷、東京駅"
@@ -185,7 +185,7 @@ function SpotsPageContent() {
           <button
             onClick={handleSearch}
             disabled={searching}
-            className="px-6 py-3 text-white font-semibold transition-all hover:opacity-90 disabled:opacity-50"
+            className="w-full md:w-auto px-6 py-4 md:py-3 text-white font-semibold transition-all hover:opacity-90 disabled:opacity-50"
             style={{
               backgroundColor: '#E8722C',
               borderRadius: '12px',
